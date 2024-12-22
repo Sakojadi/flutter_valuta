@@ -6,6 +6,7 @@ import 'reports.dart';
 import 'kassa.dart';
 import 'users.dart';
 import 'api_service.dart'; 
+import 'login.dart';
 
 void main() {
   runApp(MyApp());
@@ -22,12 +23,16 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.yellow)
       ),
-      home: MainPage(),
+      home: LoginPage(),
     );
   }
 }
 
 class MainPage extends StatefulWidget {
+  final String username;
+
+  MainPage({required this.username});
+
   @override
   MainPageState createState() => MainPageState();
 }
@@ -327,7 +332,7 @@ class MainPageState extends State<MainPage> {
                       case(0):
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => Valuta()));
+                        MaterialPageRoute(builder: (context) => Valuta(username: widget.username)));
                       case(1):
                       Navigator.push(
                         context,
@@ -342,7 +347,8 @@ class MainPageState extends State<MainPage> {
                         MaterialPageRoute(builder: (context) => Users()));
                       case(4):
                       }
-                      _isRailOpen = false; // Close the NavigationRail
+                      _isRailOpen = false; 
+                      _selectedIndex = 0;
                     });
                   },
                   extended: true,

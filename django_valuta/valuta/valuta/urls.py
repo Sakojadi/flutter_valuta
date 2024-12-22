@@ -21,8 +21,12 @@ from myapp import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    path('api/users/', views.UserList.as_view(), name='user_list'),
-    path('api/users/<int:id>/', views.ValutaList.as_view(), name='user_list'), 
+    # path('api/users/', views.UserList.as_view(), name='user_list'),
+    # path('api/users/<int:id>/', views.ValutaList.as_view(), name='user_list'), 
+    path('api/login/', views.Login.as_view(), name='login'),
+    path('api/users/', views.UserListView.as_view(), name='user-list'),  # Fetch all users
+    path('api/register/', views.RegisterView.as_view(), name='register'),  # Register user
+    path('users/<int:user_id>/', views.DeleteUserView.as_view(), name='delete-user'), 
     
     
     path('api/valutas/', views.ValutaList.as_view(), name='valuta_list'),

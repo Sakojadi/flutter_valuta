@@ -45,49 +45,119 @@ class ApiService {
     }
   }
 
+static Future<List<Map<String, dynamic>>> fetchUsers() async {
+    try {
+      final response = await http.get(Uri.parse('${_baseUrl}users/'));
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = json.decode(response.body);
+        return List<Map<String, dynamic>>.from(data);
+      } else {
+        throw Exception('Failed to load users');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Add a new user
+  static Future<void> addNewUser(String username, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${_baseUrl}register/'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'username': username,
+          'password': password,
+        }),
+      );
+
+      if (response.statusCode != 201) {
+        throw Exception('Failed to add user');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Delete a user
+  static Future<void> deleteUser(int userId) async {
+    try {
+      final response = await http.delete(Uri.parse('${_baseUrl}users/$userId/'));
+
+      if (response.statusCode != 204) {
+        throw Exception('Failed to delete user');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 
 
 
   //fetchUsers
-  static Future<List<Map<String, dynamic>>> fetchUsers() async {
-    final response = await http.get(Uri.parse('${_baseUrl}users/'));
+  // static Future<List<Map<String, dynamic>>> fetchUsers() async {
+  //   final response = await http.get(Uri.parse('${_baseUrl}users/'));
 
-    if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      return data.map((item) => {
-            'id': item['id'].toString(),
-            'username': item['username'],
-            'password': item['password'],
-          }).toList();
-    } else {
-      throw Exception('Failed to load users');
-    }
-  }
+  //   if (response.statusCode == 200) {
+  //     List<dynamic> data = json.decode(response.body);
+  //     return data.map((item) => {
+  //           'id': item['id'].toString(),
+  //           'username': item['username'],
+  //           'password': item['password'],
+  //         }).toList();
+  //   } else {
+  //     throw Exception('Failed to load users');
+  //   }
+  // }
 
 
-  // Add new User
-  static Future<void> addNewUser(String name, String password) async {
-    final response = await http.post(
-      Uri.parse('${_baseUrl}users/'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({'username': name, 'password': password}),
-    );
+  // // Add new User
+  // static Future<void> addNewUser(String name, String password) async {
+  //   final response = await http.post(
+  //     Uri.parse('${_baseUrl}users/'),
+  //     headers: {'Content-Type': 'application/json'},
+  //     body: json.encode({'username': name, 'password': password}),
+  //   );
 
-    if (response.statusCode != 201) {
-      throw Exception(
-          'Failed to create user. Status code: ${response.statusCode}');
-    }
-  }
+  //   if (response.statusCode != 201) {
+  //     throw Exception(
+  //         'Failed to create user. Status code: ${response.statusCode}');
+  //   }
+  // }
 
-  // Delete a User
-  static Future<void> deleteUser(int id) async {
-    final response = await http.delete(
-      Uri.parse('${_baseUrl}users/$id/'),
-    );
+  // // Delete a User
+  // static Future<void> deleteUser(int id) async {
+  //   final response = await http.delete(
+  //     Uri.parse('${_baseUrl}users/$id/'),
+  //   );
 
-    if (response.statusCode != 204) {
-      throw Exception(
-          'Failed to delete user. Status code: ${response.statusCode}');
+  //   if (response.statusCode != 204) {
+  //     throw Exception(
+  //         'Failed to delete user. Status code: ${response.statusCode}');
+  //   }
+  // }
+
+  static Future<Map<String, dynamic>> login(String username, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${_baseUrl}login/'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'username': username,
+          'password': password,
+        }),
+      );
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        return {'success': false, 'message': 'Invalid credentials'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Error during login: $e'};
     }
   }
 

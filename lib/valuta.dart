@@ -3,6 +3,8 @@ import 'api_service.dart';
 import 'main.dart';
 
 class Valuta extends StatefulWidget {
+  final String username;
+  Valuta({required this.username});
   @override
   ValutaState createState() => ValutaState();
 }
@@ -71,7 +73,7 @@ class ValutaState extends State<Valuta> {
             // Use Navigator.pop to go back to the MainPage
           Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => MainPage())
+              MaterialPageRoute(builder: (context) => MainPage(username:widget.username))
               );        
               },
         ),

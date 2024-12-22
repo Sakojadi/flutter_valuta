@@ -79,28 +79,28 @@ class UserPageState extends State<Users> {
               child: ListView.builder(
                 itemCount: userData.length,
                 itemBuilder: (context, index) {
-                  var item = userData[index];
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        if (selectedRowId == int.parse(item['id']!)) {
-                          selectedRowId = null; // Deselect if already selected
-                        } else {
-                          selectedRowId = int.parse(item['id']!);
-                        }
-                      });
-                    },
-                    child: Container(
-                      color: selectedRowId == int.parse(item['id']!)
-                          ? Colors.yellow.withOpacity(0.2) // Selected row color
-                          : Colors.transparent,
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
-                      child: ListTile(
-                        title: Text(item['username'] ?? ''), // Only show username
-                      ),
-                    ),
-                  );
-                },
+  var item = userData[index];
+  return GestureDetector(
+    onTap: () {
+      setState(() {
+        if (selectedRowId == item['id']) {  // Use item['id'] directly without int.parse
+          selectedRowId = null; // Deselect if already selected
+        } else {
+          selectedRowId = item['id'];  // Use item['id'] directly without int.parse
+        }
+      });
+    },
+    child: Container(
+      color: selectedRowId == item['id']  // Use item['id'] directly without int.parse
+          ? Colors.yellow.withOpacity(0.2) // Selected row color
+          : Colors.transparent,
+      padding: EdgeInsets.symmetric(vertical: 16.0),
+      child: ListTile(
+        title: Text(item['username'] ?? ''), // Only show username
+      ),
+    ),
+  );
+}
               ),
             ),
           ],
@@ -164,8 +164,7 @@ class UserPageState extends State<Users> {
                         onPressed: () {
                           if (_usernameController.text.isNotEmpty &&
                               _passwordController.text.isNotEmpty &&
-                              _passwordController.text ==
-                                  _confirmPasswordController.text) {
+                              _passwordController.text == _confirmPasswordController.text) {
                             addNewUser(_usernameController.text, _passwordController.text);
                             Navigator.pop(context); // Close dialog after adding
                           } else {
