@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       title: 'Valuta',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.yellow)
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey)
       ),
       home: LoginPage(),
     );
@@ -62,6 +62,40 @@ class MainPageState extends State<MainPage> {
       print('Error fetching valutas: $e');
     }
   }
+  Future<void> addTransaction() async {
+  _validateFields();
+  if (_isKolichestvoValid && _isKursValid && _isValutaValid && _isArrowSelected) {
+    final transactionType = _selectedButton == 'up' ? 'buy' : 'sell';
+
+    // Pass the selected valuta name (text) for the transaction
+    final result = await ApiService.addTransaction(
+      widget.username,
+      transactionType,
+      _selectedItem ?? '',  // Pass the valuta name (text)
+      _kolichestvoController.text,
+      _kursController.text,
+      _obshiyController.text,
+    );
+
+    if (result) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Transaction added successfully')),
+      );
+
+      // Clear fields
+      setState(() {
+        _kolichestvoController.clear();
+        _kursController.clear();
+        _obshiyController.clear();
+        _selectedItem = null;
+        _selectedButton = null;
+      });
+    }else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to add the transaction")));
+    }
+  }
+}
+
 
   @override
   void initState() {
@@ -129,14 +163,13 @@ class MainPageState extends State<MainPage> {
                         onTap: () {
                           setState(() {
                             _selectedButton = 'up';
-                            _validateFields();
                           });
                         },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: _selectedButton == 'up' ? Colors.yellow : Colors.transparent,
+                            color: _selectedButton == 'up' ? Colors.blueGrey : Colors.transparent,
                             border: Border.all(
-                              color: !_isArrowSelected ? Colors.red : Colors.yellow,
+                              color: !_isArrowSelected ? Colors.red : Colors.blueGrey,
                             ),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
@@ -153,14 +186,13 @@ class MainPageState extends State<MainPage> {
                         onTap: () {
                           setState(() {
                             _selectedButton = 'down';
-                            _validateFields();
                           });
                         },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: _selectedButton == 'down' ? Colors.yellow : Colors.transparent,
+                            color: _selectedButton == 'down' ? Colors.blueGrey : Colors.transparent,
                             border: Border.all(
-                              color: !_isArrowSelected ? Colors.red : Colors.yellow,
+                              color: !_isArrowSelected ? Colors.red : Colors.blueGrey,
                             ),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
@@ -180,30 +212,33 @@ class MainPageState extends State<MainPage> {
                   Container(
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: !_isValutaValid ? Colors.red : Colors.grey,
+                        color: !_isValutaValid ? Colors.red : Colors.blueGrey,
                       ),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: DropdownButton<String>(
-                      value: _selectedItem,
-                      hint: Text('Select an option'),
-                      isExpanded: true,
-                      items: _valutaList.map<DropdownMenuItem<String>>((Map<String, dynamic> item) {
-                        return DropdownMenuItem<String>(
-                          value: item['id'].toString(),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Text(item['valuta'] ?? ''),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedItem = newValue;
-                          _validateFields();
-                        });
-                      },
+                    value: _selectedItem, // Keep the selected valuta name
+                    hint: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text('Select an option'),
                     ),
+                    isExpanded: true,
+                    items: _valutaList.map<DropdownMenuItem<String>>((Map<String, dynamic> item) {
+                      return DropdownMenuItem<String>(
+                        value: item['valuta'],  // Use valuta name as value
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Text(item['valuta'] ?? ''),  // Display the valuta name
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedItem = newValue; // Save the selected valuta name
+                      });
+                    },
+                  )
+
                   ),
                   SizedBox(height: 20),
                   
@@ -279,7 +314,7 @@ class MainPageState extends State<MainPage> {
                     onPressed: () {
                       _validateFields();
                       if (_isKolichestvoValid && _isKursValid && _isValutaValid && _isArrowSelected) {
-                        // Add functionality to add data
+                        addTransaction();
                       }
                     },
                     child: Text('Добавить'),
@@ -291,7 +326,7 @@ class MainPageState extends State<MainPage> {
                       // Navigate to secondary window
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Events()),
+                        MaterialPageRoute(builder: (context) => TransactionsPage()),
                       );
                     },
                     child: Text('События'),
@@ -349,7 +384,7 @@ class MainPageState extends State<MainPage> {
                       }
                       _isRailOpen = false; 
                       _selectedIndex = 0;
-                    });
+                                                            });
                   },
                   extended: true,
                   destinations: [

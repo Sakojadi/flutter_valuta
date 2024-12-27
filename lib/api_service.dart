@@ -161,4 +161,74 @@ static Future<List<Map<String, dynamic>>> fetchUsers() async {
     }
   }
 
+  static Future<bool> addTransaction(String user, String transactionType, String currency, String quantity, String rate, String total) async {
+  try {
+    final response = await http.post(
+      Uri.parse('${_baseUrl}transactions/'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'user': user,
+        'transaction_type': transactionType,
+        'currency': currency,
+        'quantity': quantity,
+        'rate': rate,
+        'total': total,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      return true;  // Success
+    } else {
+      print('Failed to add transaction: ${response.statusCode}');
+      return false;
+    }
+  } catch (e) {
+    print("Error: $e");
+    return false;
+  }
+}
+static Future<List<Map<String, dynamic>>> fetchTransactions() async {
+  try {
+    final response = await http.get(
+      Uri.parse('${_baseUrl}transactions/'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      // Parse the JSON response as a map, then extract the 'transactions' list
+      final Map<String, dynamic> data = json.decode(response.body);
+      final List<dynamic> transactions = data['transactions']; // Get the list of transactions
+      return transactions.map((item) => item as Map<String, dynamic>).toList();
+    } else {
+      throw Exception('Failed to load transactions');
+    }
+  } catch (e) {
+    throw Exception('Error fetching transactions: $e');
+  }
+}
+
+static Future<void> deleteTransaction(int id) async {
+  try {
+    final response = await http.delete(
+      Uri.parse('${_baseUrl}transactions/$id/'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete transaction');
+    }
+  } catch (e) {
+    throw Exception('Error deleting transaction: $e');
+  }
+}
+
+
+
+
 }

@@ -26,10 +26,14 @@ urlpatterns = [
     path('api/login/', views.Login.as_view(), name='login'),
     path('api/users/', views.UserListView.as_view(), name='user-list'),  # Fetch all users
     path('api/register/', views.RegisterView.as_view(), name='register'),  # Register user
-    path('users/<int:user_id>/', views.DeleteUserView.as_view(), name='delete-user'), 
+    path('api/users/<int:user_id>/', views.DeleteUserView.as_view(), name='delete-user'), 
     
     
     path('api/valutas/', views.ValutaList.as_view(), name='valuta_list'),
     path('api/valutas/<int:id>/', views.ValutaList.as_view(), name='valuta_list'), 
+    
+    
+    path('api/transactions/', views.AddTransactionView.as_view(), name='add_transaction'),
+    path('api/transactions/<int:id>/', views.AddTransactionView.as_view(), name='delete_transaction')
     
 ]

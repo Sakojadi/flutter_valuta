@@ -1,16 +1,15 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import User, Valuta
+from .models import Valuta, Transaction
 from django.contrib.auth import authenticate
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-# from django.utils.decorators import method_decorator
-# from django.middleware.csrf import get_token
-from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from decimal import Decimal
+from django.views import View
+import json
 
 
 # class UserList(APIView):
@@ -93,8 +92,71 @@ class Login(APIView):
         else:
             # Check for the reason why authentication failed
             return JsonResponse({'success': False, 'message': 'Invalid credentials'}, status=401)
+        
 
+class AddTransactionView(View):
+    def post(self, request):
+        try:
+            data = json.loads(request.body)
+            user = data.get('user')
+            transaction_type = data.get('transaction_type')
+            currency = data.get('currency')
+            quantity = Decimal(data.get('quantity')) if data.get('quantity') else None
+            rate = Decimal(data.get('rate')) if data.get('rate') else None
+            total = Decimal(data.get('total')) if data.get('total') else None
 
+            # Validate required fields
+            if not all([user, transaction_type, currency, quantity, rate, total]):
+                return JsonResponse({'error': 'Missing required fields'}, status=400)
+
+            # Save to the database
+            transaction = Transaction.objects.create(
+                user=user,
+                transaction_type=transaction_type,
+                currency=currency,
+                quantity=quantity,
+                rate=rate,
+                total=total
+            )
+
+            return JsonResponse({'message': 'Transaction added successfully', 'id': transaction.id}, status=201)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+        except Exception as e:
+            return JsonResponse({'error': f'Error: {str(e)}'}, status=500)
+        
+    def get(self, request):
+        try:
+            transactions = Transaction.objects.all()  # Fetch all transactions from the database
+            transaction_list = []
+
+            for transaction in transactions:
+                transaction_list.append({
+                    'date': transaction.date.strftime('%Y-%m-%d %H:%M:%S'),
+                    'user':transaction.user,
+                    'transaction_type': transaction.transaction_type,
+                    'currency': transaction.currency,
+                    'quantity': str(transaction.quantity),  # Convert Decimal to string
+                    'rate': str(transaction.rate),  # Convert Decimal to string
+                    'total': str(transaction.total),  # Convert Decimal to string
+                    'id': transaction.id,
+                })
+
+            return JsonResponse({'transactions': transaction_list}, status=200)
+
+        except Exception as e:
+            return JsonResponse({'error': f'Error: {str(e)}'}, status=500)
+        
+    def delete(self, request, id):
+        try:
+            transaction = Transaction.objects.get(id=id)
+            transaction.delete()
+            return JsonResponse({'message': 'Transaction deleted successfully'}, status=200)
+        except Transaction.DoesNotExist:
+            return JsonResponse({'error': 'Transaction not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': f'Error: {str(e)}'}, status=500)
 
 
 
