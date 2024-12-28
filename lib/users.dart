@@ -92,7 +92,7 @@ class UserPageState extends State<Users> {
     },
     child: Container(
       color: selectedRowId == item['id']  // Use item['id'] directly without int.parse
-          ? Colors.yellow.withOpacity(0.2) // Selected row color
+          ? Colors.blue.withOpacity(0.2) // Selected row color
           : Colors.transparent,
       padding: EdgeInsets.symmetric(vertical: 16.0),
       child: ListTile(

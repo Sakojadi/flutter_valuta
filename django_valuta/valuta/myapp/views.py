@@ -93,6 +93,11 @@ class Login(APIView):
             # Check for the reason why authentication failed
             return JsonResponse({'success': False, 'message': 'Invalid credentials'}, status=401)
         
+from django.views import View
+from django.http import JsonResponse
+from .models import Transaction
+from decimal import Decimal
+import json
 
 class AddTransactionView(View):
     def post(self, request):
@@ -125,7 +130,7 @@ class AddTransactionView(View):
             return JsonResponse({'error': 'Invalid JSON data'}, status=400)
         except Exception as e:
             return JsonResponse({'error': f'Error: {str(e)}'}, status=500)
-        
+
     def get(self, request):
         try:
             transactions = Transaction.objects.all()  # Fetch all transactions from the database
@@ -134,7 +139,7 @@ class AddTransactionView(View):
             for transaction in transactions:
                 transaction_list.append({
                     'date': transaction.date.strftime('%Y-%m-%d %H:%M:%S'),
-                    'user':transaction.user,
+                    'user': transaction.user,
                     'transaction_type': transaction.transaction_type,
                     'currency': transaction.currency,
                     'quantity': str(transaction.quantity),  # Convert Decimal to string
@@ -147,7 +152,35 @@ class AddTransactionView(View):
 
         except Exception as e:
             return JsonResponse({'error': f'Error: {str(e)}'}, status=500)
-        
+
+    def put(self, request, id):
+        try:
+            # Parse JSON request body
+            data = json.loads(request.body)
+
+            # Fetch the transaction to be updated
+            transaction = Transaction.objects.get(id=id)
+
+            # Update fields if provided in the request
+            transaction.user = data.get('user', transaction.user)
+            transaction.transaction_type = data.get('transaction_type', transaction.transaction_type)
+            transaction.currency = data.get('currency', transaction.currency)
+            transaction.quantity = Decimal(data['quantity']) if 'quantity' in data else transaction.quantity
+            transaction.rate = Decimal(data['rate']) if 'rate' in data else transaction.rate
+            transaction.total = Decimal(data['total']) if 'total' in data else transaction.total
+
+            # Save the updated transaction
+            transaction.save()
+
+            return JsonResponse({'message': 'Transaction updated successfully'}, status=200)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+        except Transaction.DoesNotExist:
+            return JsonResponse({'error': 'Transaction not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': f'Error: {str(e)}'}, status=500)
+
     def delete(self, request, id):
         try:
             transaction = Transaction.objects.get(id=id)

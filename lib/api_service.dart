@@ -59,6 +59,7 @@ static Future<List<Map<String, dynamic>>> fetchUsers() async {
       rethrow;
     }
   }
+  
 
   // Add a new user
   static Future<void> addNewUser(String username, String password) async {
@@ -228,7 +229,15 @@ static Future<void> deleteTransaction(int id) async {
   }
 }
 
+static Future<bool> updateTransaction(int id, Map<String, dynamic> updatedData) async {
+    final response = await http.put(
+      Uri.parse('${_baseUrl}transactions/$id/'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(updatedData),
+    );
 
+    return response.statusCode == 200;
+  }
 
 
 }

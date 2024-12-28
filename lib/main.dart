@@ -364,23 +364,23 @@ class MainPageState extends State<MainPage> {
                     setState(() {
                       _selectedIndex = index;
                       switch(index){
-                      case(0):
+                      case(1):
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => Valuta(username: widget.username)));
-                      case(1):
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => Reports()));
                       case(2):
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Kassa()));
+                        MaterialPageRoute(builder: (context) => Reports()));
                       case(3):
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Users()));
+                        MaterialPageRoute(builder: (context) => Kassa()));
                       case(4):
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Users()));
+                      case(5):
                       }
                       _isRailOpen = false; 
                       _selectedIndex = 0;
@@ -388,6 +388,10 @@ class MainPageState extends State<MainPage> {
                   },
                   extended: true,
                   destinations: [
+                    NavigationRailDestination(
+                      icon: Icon(Icons.home),
+                      label: Text('Главная'),
+                    ),
                     NavigationRailDestination(
                       icon: Icon(Icons.money),
                       label: Text('Валюта'),
