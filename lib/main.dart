@@ -375,7 +375,7 @@ class MainPageState extends State<MainPage> {
                       case(3):
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Kassa()));
+                        MaterialPageRoute(builder: (context) => KassaPage()));
                       case(4):
                       Navigator.push(
                         context,
