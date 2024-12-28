@@ -218,3 +218,30 @@ class ValutaList(APIView):
         except Valuta.DoesNotExist:
             return Response({'error': 'Valuta not found'}, status=status.HTTP_404_NOT_FOUND)
         
+class Deletion(APIView):
+    # Delete all transactions
+    def delete(self, request, *args, **kwargs):
+        action = kwargs.get('action')
+        if action == 'transactions':
+            return self.delete_all_transactions(request)
+        elif action == 'valutas':
+            return self.delete_all_valutas(request)
+        else:
+            return JsonResponse({'error': 'Invalid action'}, status=400)
+
+    def delete_all_transactions(self, request):
+        try:
+            Transaction.objects.all().delete()  # Delete all transactions
+            return JsonResponse({'message': 'All transactions deleted'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    def delete_all_valutas(self, request):
+        try:
+            Valuta.objects.all().delete()  # Delete all valutas
+            return JsonResponse({'message': 'All valutas deleted'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+
+        

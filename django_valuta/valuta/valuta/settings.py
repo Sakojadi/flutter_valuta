@@ -25,8 +25,10 @@ SECRET_KEY = 'django-insecure-cbkro420+6_us@fw31p4^rn_&@-v!4gq($1q+#qy($7us8v^&p
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', '10.0.2.2', 'localhost']
+ALLOWED_HOSTS = ['127.0.0.1', '10.0.2.2', 'localhost', "Sakojadi2.pythonanywhere.com"]
 
+STATIC_ROOT = '/home/Sakojadi2/valuta/static/'
+MEDIA_ROOT = '/home/Sakojadi2/valuta/media/'
 
 
 # Application definition
@@ -114,7 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'ASIA/BISHKEK'
+TIME_ZONE = 'Asia/Bishkek'
 
 USE_I18N = True
 

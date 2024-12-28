@@ -152,7 +152,7 @@ class TransactionsPageState extends State<TransactionsPage> {
         children: [
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(6.0),
+              padding: const EdgeInsets.all(8.0),
               child: filteredTransactionData.isEmpty
                   ? const Center(child: Text('No transactions available'))
                   : SingleChildScrollView(

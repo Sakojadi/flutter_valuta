@@ -62,6 +62,17 @@ class MainPageState extends State<MainPage> {
       print('Error fetching valutas: $e');
     }
   }
+
+  Future<void> deleteAllData() async {
+    bool result = await ApiService.deleteAllData();
+    if (result){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('All data deleted successfully')));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to delete all data')));
+    }
+  }
+
+
   Future<void> addTransaction() async {
   _validateFields();
   if (_isKolichestvoValid && _isKursValid && _isValutaValid && _isArrowSelected) {
@@ -368,19 +379,25 @@ class MainPageState extends State<MainPage> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => Valuta(username: widget.username)));
+                        break;
                       case(2):
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => Reports()));
+                        break;
                       case(3):
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => KassaPage()));
+                        break;
                       case(4):
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => Users()));
+                        break;
                       case(5):
+                      deleteAllData();
+                      break;
                       }
                       _isRailOpen = false; 
                       _selectedIndex = 0;
