@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'api_service.dart';
 
 class Users extends StatefulWidget {
+  final String username;
+  Users({required this.username});
   @override
   UserPageState createState() => UserPageState();
 }
@@ -67,40 +69,60 @@ class UserPageState extends State<Users> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('User Management'),
+        title: Center(child: Text('USERS')),
+    leading: IconButton(
+      icon: Icon(Icons.arrow_back),
+        onPressed: () {
+          Navigator.pop(context);
+            setState(() {
+      selectedRowId = null;
+    });},
+        ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: userData.length,
-                itemBuilder: (context, index) {
-  var item = userData[index];
-  return GestureDetector(
-    onTap: () {
-      setState(() {
-        if (selectedRowId == item['id']) {  // Use item['id'] directly without int.parse
-          selectedRowId = null; // Deselect if already selected
-        } else {
-          selectedRowId = item['id'];  // Use item['id'] directly without int.parse
-        }
-      });
-    },
-    child: Container(
-      color: selectedRowId == item['id']  // Use item['id'] directly without int.parse
-          ? Colors.blue.withOpacity(0.2) // Selected row color
-          : Colors.transparent,
-      padding: EdgeInsets.symmetric(vertical: 16.0),
-      child: ListTile(
-        title: Text(item['username'] ?? ''), // Only show username
-      ),
-    ),
-  );
-}
+  padding: const EdgeInsets.all(16.0),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      SizedBox(height: 20),
+      Expanded(
+        child: Table(
+           border: TableBorder(
+            horizontalInside: BorderSide(
+              color: Theme.of(context).colorScheme.surface, // Color of the horizontal border
+              width: 4, // Thickness of the border
+            ),
+            verticalInside: BorderSide.none, // Remove vertical borders if needed
+          ),
+          children: userData.map<TableRow>((item) {
+            return TableRow(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      if (selectedRowId == item['id']) {  
+                        selectedRowId = null; // Deselect if already selected
+                      } else {
+                        selectedRowId = item['id']; // Select the current row
+                      }
+                    });
+                  },
+                  child: Container(
+                    color: selectedRowId == item['id'] // Highlight selected row
+                        ? Theme.of(context).colorScheme.secondary.withOpacity(0.6)
+                        : Theme.of(context).primaryColor,
+                    padding: EdgeInsets.symmetric(vertical: 16.0),
+                    alignment: Alignment.center,
+                    child: Text(
+                      item['username'] ?? '',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16, color: Colors.black),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }).toList(),
               ),
             ),
           ],

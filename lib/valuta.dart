@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
-import 'main.dart';
 
 class Valuta extends StatefulWidget {
-  final String username;
-  Valuta({required this.username});
   @override
   ValutaState createState() => ValutaState();
 }
@@ -67,53 +64,98 @@ class ValutaState extends State<Valuta> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Valuta Window'),
-                leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            // Use Navigator.pop to go back to the MainPage
-          Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => MainPage(username:widget.username))
-              );        
-              },
+        leading: IconButton(
+      icon: Icon(Icons.arrow_back),
+        onPressed: () {
+          Navigator.pop(context);
+            setState(() {
+      selectedRowId = null;
+    });},
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: valutaData.length,
-                itemBuilder: (context, index) {
-                  var item = valutaData[index];
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        if (selectedRowId == int.parse(item['id']!)) {
-                          selectedRowId = null; // Deselect if already selected
-                        } else {
-                          selectedRowId = int.parse(item['id']!);
-                        }
-                      });
-                    },
-                    child: Container(
-                      color: selectedRowId == int.parse(item['id']!)
-                          ? Colors.yellow.withOpacity(0.2) // Selected row color
-                          : Colors.transparent,
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
-                      child: ListTile(
-                        title: Text(item['valuta'] ?? ''),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
+  crossAxisAlignment: CrossAxisAlignment.stretch,
+  children: [
+    SizedBox(height: 20),
+    Expanded(
+      child: Table(
+        border: TableBorder(
+          horizontalInside: BorderSide(
+            color: Theme.of(context).colorScheme.surface, // Color of the horizontal border
+            width: 4, // Thickness of the border
+          ),
+          verticalInside: BorderSide.none, // Remove vertical borders if needed
         ),
+        children: valutaData.map<TableRow>((item) {
+          return TableRow(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    if (selectedRowId == int.parse(item['id']!)) {
+                      selectedRowId = null; // Deselect if already selected
+                    } else {
+                      selectedRowId = int.parse(item['id']!); // Select the current row
+                    }
+                  });
+                },
+                child: Container(
+                  color: selectedRowId == int.parse(item['id']!)
+                      ? Theme.of(context).colorScheme.secondary.withOpacity(0.6) // Highlighted row
+                      : Theme.of(context).primaryColor, // Regular row color
+                  padding: EdgeInsets.symmetric(vertical: 16.0),
+                  alignment: Alignment.center,
+                  child: Text(
+                    item['valuta'] ?? '',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, color: Colors.black),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }).toList(),
+      ),
+    ),
+  ],
+),
+
+        // child: Column(
+        //   crossAxisAlignment: CrossAxisAlignment.stretch,
+        //   children: [
+        //     SizedBox(height: 20),
+        //     Expanded(
+        //       child: ListView.builder(
+        //         itemCount: valutaData.length,
+        //         itemBuilder: (context, index) {
+        //           var item = valutaData[index];
+        //           return GestureDetector(
+        //             onTap: () {
+        //               setState(() {
+        //                 if (selectedRowId == int.parse(item['id']!)) {
+        //                   selectedRowId = null; // Deselect if already selected
+        //                 } else {
+        //                   selectedRowId = int.parse(item['id']!);
+        //                 }
+        //               });
+        //             },
+        //             child: Container(
+        //               color: selectedRowId == int.parse(item['id']!)
+        //                   ? Colors.yellow.withOpacity(0.2) // Selected row color
+        //                   : Colors.transparent,
+        //               padding: EdgeInsets.symmetric(vertical: 16.0),
+        //               child: ListTile(
+        //                 title: Text(item['valuta'] ?? ''),
+        //               ),
+        //             ),
+        //           );
+        //         },
+        //       ),
+        //     ),
+        //   ],
+        // ),
       ),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,

@@ -196,9 +196,9 @@ static Future<bool> updateTransaction(int id, Map<String, dynamic> updatedData) 
  static Future<bool> deleteAllData() async {
     try {
       final response1 = await http.delete(Uri.parse('${_baseUrl}delete/transactions/'));
-      final response2 = await http.delete(Uri.parse('${_baseUrl}delete/valutas/'));
+      // final response2 = await http.delete(Uri.parse('${_baseUrl}delete/valutas/'));
 
-      if (response1.statusCode == 200 && response2.statusCode == 200) {
+      if (response1.statusCode == 200) {  //&& response2.statusCode == 200
         return true;
       } else {
         print('Failed to delete data');

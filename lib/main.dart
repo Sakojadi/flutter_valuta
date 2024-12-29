@@ -20,13 +20,35 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Valuta',
       theme: ThemeData(
+        brightness: Brightness.dark,
+        fontFamily: 'Georgia',
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey)
+        primaryColor: Colors.yellow[700]!,
+        colorScheme: ColorScheme.dark(
+          primary: Colors.yellow[700]!,
+          secondary: Colors.teal[300]!,
+          background: Colors.grey[900]!,
+          surface: Colors.grey[800]!,
+          error: Colors.redAccent,
+          onPrimary: Colors.black,
+          onSecondary: Colors.black,
+          onBackground: Colors.white,
+          onSurface: Colors.white,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.yellow[700]!, // Button background color
+            foregroundColor: Colors.black,       // Button text color
+            elevation: 4.0,                      // Shadow for button
+          ),
+        ),
       ),
       home: LoginPage(),
     );
   }
 }
+
+
 
 class MainPage extends StatefulWidget {
   final String username;
@@ -39,7 +61,7 @@ class MainPage extends StatefulWidget {
 
 class MainPageState extends State<MainPage> {
   bool _isRailOpen = false;
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
   String? _selectedItem;
   String? _selectedButton;
   final TextEditingController _kolichestvoController = TextEditingController();
@@ -135,7 +157,6 @@ class MainPageState extends State<MainPage> {
   // Validate all fields
   void _validateFields() {
     setState(() {
-      // Check if fields are empty
       _isKolichestvoValid = _kolichestvoController.text.isNotEmpty;
       _isKursValid = _kursController.text.isNotEmpty;
       _isValutaValid = _selectedItem != null;
@@ -178,9 +199,9 @@ class MainPageState extends State<MainPage> {
                         },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: _selectedButton == 'up' ? Colors.blueGrey : Colors.transparent,
+                            color: _selectedButton == 'up' ?Theme.of(context).primaryColor : Colors.transparent,
                             border: Border.all(
-                              color: !_isArrowSelected ? Colors.red : Colors.blueGrey,
+                              color: !_isArrowSelected ? Colors.red : Theme.of(context).primaryColor,
                             ),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
@@ -201,9 +222,9 @@ class MainPageState extends State<MainPage> {
                         },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: _selectedButton == 'down' ? Colors.blueGrey : Colors.transparent,
+                            color: _selectedButton == 'down' ? Theme.of(context).primaryColor : Colors.transparent,
                             border: Border.all(
-                              color: !_isArrowSelected ? Colors.red : Colors.blueGrey,
+                              color: !_isArrowSelected ? Colors.red : Theme.of(context).primaryColor,
                             ),
                             borderRadius: BorderRadius.circular(8.0),
                           ),
@@ -218,39 +239,47 @@ class MainPageState extends State<MainPage> {
                     ],
                   ),
                   SizedBox(height: 20),
-                  
-                  // Dropdown
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: !_isValutaValid ? Colors.red : Colors.blueGrey,
-                      ),
-                      borderRadius: BorderRadius.circular(4),
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: !_isValutaValid
+                      ? Colors.red
+                      : Theme.of(context).primaryColor, // Match text field border color logic
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0), // Add inner padding
+              child: DropdownButtonHideUnderline( // Remove the default underline
+                child: DropdownButton<String>(
+                  value: _selectedItem, // Keep the selected valuta name
+                  hint: Text(
+                    'Select an option',
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge?.color, // Match text color
                     ),
-                    child: DropdownButton<String>(
-                    value: _selectedItem, // Keep the selected valuta name
-                    hint: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text('Select an option'),
-                    ),
-                    isExpanded: true,
-                    items: _valutaList.map<DropdownMenuItem<String>>((Map<String, dynamic> item) {
-                      return DropdownMenuItem<String>(
-                        value: item['valuta'],  // Use valuta name as value
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Text(item['valuta'] ?? ''),  // Display the valuta name
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedItem = newValue; // Save the selected valuta name
-                      });
-                    },
-                  )
-
                   ),
+                  isExpanded: true,
+                  items: _valutaList.map<DropdownMenuItem<String>>((Map<String, dynamic> item) {
+                    return DropdownMenuItem<String>(
+                      value: item['valuta'], // Use valuta name as value
+                      child: Text(
+                        item['valuta'] ?? '',
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge?.color, // Match text color
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      _selectedItem = newValue; // Save the selected valuta name
+                    });
+                  },
+                ),
+              ),
+            ),
+
+
                   SizedBox(height: 20),
                   
                   // Kolichestvo TextField
@@ -316,6 +345,17 @@ class MainPageState extends State<MainPage> {
                     decoration: InputDecoration(
                       labelText: 'Общий',
                       border: OutlineInputBorder(),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: 
+                              Theme.of(context).primaryColor
+                        ),
+                      ),
                     ),
                   ),
                   SizedBox(height: 20),
@@ -339,6 +379,7 @@ class MainPageState extends State<MainPage> {
                         context,
                         MaterialPageRoute(builder: (context) => TransactionsPage()),
                       );
+                      resetState();
                     },
                     child: Text('События'),
                   ),
@@ -374,37 +415,52 @@ class MainPageState extends State<MainPage> {
                   onDestinationSelected: (int index) {
                     setState(() {
                       _selectedIndex = index;
+                      _selectedIndex = 1;
                       switch(index){
-                      case(1):
-                      Navigator.pushReplacement(
+                      case(0): // Exit/Logout
+                      Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => Valuta(username: widget.username)));
-                        break;
+                        MaterialPageRoute(builder: (context) => LoginPage()), // Go back to LoginPage
+                        (route) => false, // Remove all routes from the stack
+                      );
+                      break;
                       case(2):
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Reports()));
+                        MaterialPageRoute(builder: (context) => Valuta()));
+                          resetState();
+                          fetchValutas();
                         break;
                       case(3):
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => KassaPage()));
+                        MaterialPageRoute(builder: (context) => Reports()));
+                        resetState();
                         break;
                       case(4):
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => Users()));
+                        MaterialPageRoute(builder: (context) => KassaPage()));
+                        resetState();
                         break;
                       case(5):
-                      deleteAllData();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Users(username: widget.username)));
+                        resetState();
+                        break;
+                      case(6):
+                      showDeleteConfirmationDialog(context);
                       break;
                       }
-                      _isRailOpen = false; 
-                      _selectedIndex = 0;
-                                                            });
+                      _isRailOpen = false; });
                   },
                   extended: true,
                   destinations: [
+                    NavigationRailDestination(
+                    icon: Icon(Icons.exit_to_app, color: Colors.red), // Exit icon
+                    label: Text('Logout'),
+                  ),
                     NavigationRailDestination(
                       icon: Icon(Icons.home),
                       label: Text('Главная'),
@@ -438,4 +494,45 @@ class MainPageState extends State<MainPage> {
       ),
     );
   }
+
+void resetState() {
+  _isKolichestvoValid = true;
+  _isKursValid = true;
+  _isValutaValid = true;
+  _isArrowSelected = true;
+  setState(() {
+    _kolichestvoController.clear();
+    _kursController.clear();
+    _obshiyController.clear();
+    _selectedItem = null;
+    _selectedButton = null;
+  });
+}
+
+void showDeleteConfirmationDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Prevent closing the dialog by tapping outside
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Delete all data?'),
+        actions: <Widget>[
+          TextButton(
+            child: Text('No'),
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+          ),
+          TextButton(
+            child: Text('Yes'),
+            onPressed: () {
+              deleteAllData();
+              Navigator.of(context).pop(); // Close the dialog
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
 }

@@ -11,8 +11,8 @@ class TransactionsPageState extends State<TransactionsPage> {
   List<Map<String, dynamic>> filteredTransactionData = [];
   List<Map<String, dynamic>> valutaList = [];
   List<Map<String, dynamic>> userData = [];
-  String selectedValutaFilter = "-";
-  String selectedUserFilter = "-";
+  String selectedValutaFilter = "Filter by Valuta";
+  String selectedUserFilter = "Filter by User";
   String? selectedTransactionTypeFilter; 
   int? selectedRowId;
 
@@ -40,7 +40,7 @@ class TransactionsPageState extends State<TransactionsPage> {
 
     setState(() {
       // Add the blank option at the beginning
-      valutaList = [{'valuta': '-'}] + formattedValutas;
+      valutaList = [{'valuta': 'Filter by Valuta'}] + formattedValutas;
     });
   } catch (e) {
     _showError('Error fetching valutas: $e');
@@ -53,7 +53,7 @@ class TransactionsPageState extends State<TransactionsPage> {
     final fetchedUsers = await ApiService.fetchUsers();
 
     setState(() {
-      userData = [{'user': '-'}] + fetchedUsers.map<Map<String, String>>((user) {
+      userData = [{'user': 'Filter by User'}] + fetchedUsers.map<Map<String, String>>((user) {
         return {'user': user['username']?.toString() ?? ''};
       }).toList();
     });
@@ -69,8 +69,8 @@ class TransactionsPageState extends State<TransactionsPage> {
   void _applyFilter() {
   setState(() {
     filteredTransactionData = transactionData.where((transaction) {
-      final matchesUser = selectedUserFilter == "-" || transaction['user'] == selectedUserFilter;
-      final matchesValuta = selectedValutaFilter == "-" || transaction['currency'] == selectedValutaFilter;
+      final matchesUser = selectedUserFilter == "Filter by User" || transaction['user'] == selectedUserFilter;
+      final matchesValuta = selectedValutaFilter == "Filter by Valuta" || transaction['currency'] == selectedValutaFilter;
       final matchesType = selectedTransactionTypeFilter == null || transaction['transaction_type'] == selectedTransactionTypeFilter;
       return matchesValuta && matchesType && matchesUser;
     }).toList();
@@ -141,6 +141,14 @@ class TransactionsPageState extends State<TransactionsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Transactions'),
+        leading: IconButton(
+      icon: Icon(Icons.arrow_back),
+        onPressed: () {
+          Navigator.pop(context);
+            setState(() {
+      selectedRowId = null;
+    });},
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list),
@@ -158,8 +166,8 @@ class TransactionsPageState extends State<TransactionsPage> {
                   : SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: DataTable(
-                        headingRowColor: MaterialStateColor.resolveWith((states) => Colors.grey[300]!),
-                        border: TableBorder.all(color: Colors.grey),
+                        headingRowColor: MaterialStateColor.resolveWith((states) =>Theme.of(context).colorScheme.secondary),
+                        border: TableBorder.all(color: Colors.black),
                         columns: const [
                           DataColumn(label: Text('Date')),
                           DataColumn(label: Text('sell/buy')),
@@ -234,40 +242,88 @@ class TransactionsPageState extends State<TransactionsPage> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Filter by User:', style: TextStyle(fontSize: 16)),
-                DropdownButton<String>(
-                  isExpanded: true,
+                // DropdownButton<String>(
+                //   isExpanded: true,
+                //   value: tempSelectedUser,
+                //   items: userData.map((user) {
+                //     return DropdownMenuItem<String>(
+                //       value: user['user'],
+                //       child: Text(user['user']),
+                //     );
+                //   }).toList(),
+                //   onChanged: (value) {
+                //     setDialogState(() {
+                //       tempSelectedUser = value!;
+                //     });
+                //   },
+                // ),
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                  color: Theme.of(context).primaryColor,
+                ),),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0), // Add inner padding
+              child: DropdownButtonHideUnderline( // Remove the default underline
+                child: DropdownButton<String>(
                   value: tempSelectedUser,
-                  items: userData.map((user) {
+                  isExpanded: true,
+                  items: userData.map<DropdownMenuItem<String>>((Map<String, dynamic> item) {
                     return DropdownMenuItem<String>(
-                      value: user['user'],
-                      child: Text(user['user']),
+                      value: item['user'], // Use valuta name as value
+                      child: Text(item['user'],),
                     );
                   }).toList(),
-                  onChanged: (value) {
+                  onChanged: (String? value) {
                     setDialogState(() {
-                      tempSelectedUser = value!;
+                      tempSelectedUser = value!; // Save the selected valuta name
                     });
                   },
                 ),
+              ),
+            ),
                 const SizedBox(height: 20),
                 const SizedBox(height: 10),
-                const Text('Filter by Valuta:', style: TextStyle(fontSize: 16)),
-                DropdownButton<String>(
-                  isExpanded: true,
+                // DropdownButton<String>(
+                //   isExpanded: true,
+                //   value: tempSelectedValuta,
+                //   items: valutaList.map((valuta) {
+                //     return DropdownMenuItem<String>(
+                //       value: valuta['valuta'],
+                //       child: Text(valuta['valuta']),
+                //     );
+                //   }).toList(),
+                //   onChanged: (value) {
+                //     setDialogState(() {
+                //       tempSelectedValuta = value!;
+                //     });
+                //   },
+                // ),
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                  color: Theme.of(context).primaryColor,
+                ),),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0), // Add inner padding
+              child: DropdownButtonHideUnderline( // Remove the default underline
+                child: DropdownButton<String>(
                   value: tempSelectedValuta,
-                  items: valutaList.map((valuta) {
+                  isExpanded: true,
+                  items: valutaList.map<DropdownMenuItem<String>>((Map<String, dynamic> item) {
                     return DropdownMenuItem<String>(
-                      value: valuta['valuta'],
-                      child: Text(valuta['valuta']),
+                      value: item['valuta'], // Use valuta name as value
+                      child: Text(item['valuta'],),
                     );
                   }).toList(),
-                  onChanged: (value) {
+                  onChanged: (String? value) {
                     setDialogState(() {
-                      tempSelectedValuta = value!;
+                      tempSelectedValuta = value!; // Save the selected valuta name
                     });
                   },
                 ),
+              ),
+            ),
                 const SizedBox(height: 20),
                 const Text('Filter by Type:', style: TextStyle(fontSize: 16)),
                 const SizedBox(height: 10),
@@ -284,9 +340,9 @@ class TransactionsPageState extends State<TransactionsPage> {
                       child: Container(
                         decoration: BoxDecoration(
                           color: tempSelectedTransactionType == "buy"
-                              ? Colors.blueGrey
+                              ? Theme.of(context).primaryColor
                               : Colors.transparent,
-                          border: Border.all(color: Colors.blueGrey),
+                          border: Border.all(color: Theme.of(context).primaryColor),
                           borderRadius: BorderRadius.circular(8.0),
                         ),
                         padding: const EdgeInsets.all(8.0),
@@ -310,9 +366,9 @@ class TransactionsPageState extends State<TransactionsPage> {
                       child: Container(
                         decoration: BoxDecoration(
                           color: tempSelectedTransactionType == "sell"
-                              ? Colors.blueGrey
+                              ? Theme.of(context).primaryColor
                               : Colors.transparent,
-                          border: Border.all(color: Colors.blueGrey),
+                          border: Border.all(color: Theme.of(context).primaryColor),
                           borderRadius: BorderRadius.circular(8.0),
                         ),
                         padding: const EdgeInsets.all(8.0),
