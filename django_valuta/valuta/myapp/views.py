@@ -92,7 +92,24 @@ class Login(APIView):
         else:
             # Check for the reason why authentication failed
             return JsonResponse({'success': False, 'message': 'Invalid credentials'}, status=401)
+
+class UpdatePasswordView(APIView):
+    def put(self, request, user_id):
+        try:
+            data = json.loads(request.body)
+            user = User.objects.get(user_id=id)
+            user.password = data.get('password', user.password)
+            user.save()
+
+            return JsonResponse({'message': 'Password updated successfully'}, status=200)
         
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+        except Transaction.DoesNotExist:
+            return JsonResponse({'error': 'Transaction not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': f'Error: {str(e)}'}, status=500)
+
 from django.views import View
 from django.http import JsonResponse
 from .models import Transaction

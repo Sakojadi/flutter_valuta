@@ -102,9 +102,9 @@ List<Map<String, dynamic>> calculateTransactionData() {
 
     formattedData.add({
       'valuta': currency,
-      'pokupka_total': data['pokupka_total'],
+      'pokupka_total': data['pokupka_value'],
       'pokupka_avg': pokupka_avg,
-      'sold_total': data['sold_total'],
+      'sold_total': data['sold_value'],
       'sold_avg': sold_avg,
       'profit': profit,
     });

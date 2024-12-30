@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ApiService {
   static const String _baseUrl = "https://Sakojadi2.pythonanywhere.com/api/"; // Change for iOS or physical device
-
+// https://Sakojadi2.pythonanywhere.com/
   // Fetch all Valutas
   static Future<List<Map<String, dynamic>>> fetchValutas() async {
     final response = await http.get(Uri.parse('${_baseUrl}valutas/'));
@@ -209,5 +209,20 @@ static Future<bool> updateTransaction(int id, Map<String, dynamic> updatedData) 
       return false;
     }
   }
+
+static Future<void> updateUserPassword(int id, String newPassword) async {
+  final response = await http.put(
+    Uri.parse('${_baseUrl}userss/$id/'),
+    headers: {'Content-Type': 'application/json'},
+    body: json.encode({'password': newPassword}),
+  );
+
+  if (response.statusCode != 200) {
+    throw Exception('Failed to update password');
+  }
+}
+
+
+
 
 }

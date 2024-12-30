@@ -34,5 +34,6 @@ urlpatterns = [
     path('api/transactions/', views.AddTransactionView.as_view(), name='add_transaction'),
     path('api/transactions/<int:id>/', views.AddTransactionView.as_view(), name='delete_transaction'),
     
-    path('api/delete/<str:action>/', views.Deletion.as_view(), name='delete_data'),    
+    path('api/delete/<str:action>/', views.Deletion.as_view(), name='delete_data'), 
+    path('api/userss/<int:id>/', views.UpdatePasswordView.as_view(), name='update-password'),   
 ]

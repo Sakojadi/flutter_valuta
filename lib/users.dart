@@ -11,6 +11,7 @@ class Users extends StatefulWidget {
 class UserPageState extends State<Users> {
   List<Map<String, dynamic>> userData = []; // To store the fetched data
   int? selectedRowId; // To track the selected row ID
+  String selectedRowText = '';
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
@@ -55,9 +56,12 @@ class UserPageState extends State<Users> {
   }
 
   // Display error messages
-  void _showError(String message) {
+void _showError(String message) {
+  if (mounted) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
+}
+
 
   @override
   void initState() {
@@ -67,6 +71,12 @@ class UserPageState extends State<Users> {
 
   @override
   Widget build(BuildContext context) {
+    if (selectedRowId != null) {
+      var selectedRow = userData.firstWhere(
+        (item) => item['id'] == selectedRowId,
+      );
+        selectedRowText = selectedRow['username'] ?? ''; 
+    }
     return Scaffold(
       appBar: AppBar(
         title: Center(child: Text('USERS')),
@@ -128,15 +138,76 @@ class UserPageState extends State<Users> {
           ],
         ),
       ),
+      
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
+          
           if (selectedRowId != null) ...[
             FloatingActionButton(
               onPressed: deleteUser,
               child: Icon(Icons.delete),
               backgroundColor: Colors.red,
             ),
+            SizedBox(width: 10),
+        if (selectedRowText == widget.username) ...[
+        FloatingActionButton(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text('Change Password'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: _passwordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          labelText: 'New Password',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      TextField(
+                        controller: _confirmPasswordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          labelText: 'Confirm New Password',
+                          border: OutlineInputBorder(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context), // Close dialog
+                      child: Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (_passwordController.text.isNotEmpty &&
+                            _confirmPasswordController.text.isNotEmpty &&
+                            _passwordController.text == _confirmPasswordController.text) {
+                          updatePassword(_passwordController.text);
+                          Navigator.pop(context); // Close dialog after updating
+                        } else {
+                          _showError('Passwords do not match or fields are empty');
+                        }
+                      },
+                      child: Text('Change Password'),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+          child: Icon(Icons.edit),
+          backgroundColor: Colors.teal,
+        ),
+      ],
+
             SizedBox(width: 10),
           ],
           FloatingActionButton(
@@ -206,4 +277,19 @@ class UserPageState extends State<Users> {
       ),
     );
   }
+  // Update password for the user
+Future<void> updatePassword(String newPassword) async {
+  if (selectedRowId != null) {
+    try {
+      await ApiService.updateUserPassword(selectedRowId!, newPassword);
+      _passwordController.clear();
+      _confirmPasswordController.clear();
+      fetchUsers();
+      _showError('Succesfully updated password for $selectedRowText');
+    } catch (e) {
+      _showError('Error updating password: $e');
+    }
+  }
+}
+
 }
