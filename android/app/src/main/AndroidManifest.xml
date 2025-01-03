@@ -2,7 +2,7 @@
     <application
         android:label="flutter_valuta"
         android:name="${applicationName}"
-        android:icon="@drawable/splash_icon"
+        android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true"
         >
         <activity

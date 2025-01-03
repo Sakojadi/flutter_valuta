@@ -80,6 +80,8 @@ class ValutaState extends State<Valuta> {
   children: [
     SizedBox(height: 20),
     Expanded(
+      child:SingleChildScrollView(
+      scrollDirection: Axis.vertical,
       child: Table(
         border: TableBorder(
           horizontalInside: BorderSide(
@@ -118,44 +120,11 @@ class ValutaState extends State<Valuta> {
           );
         }).toList(),
       ),
+      ),
     ),
   ],
 ),
 
-        // child: Column(
-        //   crossAxisAlignment: CrossAxisAlignment.stretch,
-        //   children: [
-        //     SizedBox(height: 20),
-        //     Expanded(
-        //       child: ListView.builder(
-        //         itemCount: valutaData.length,
-        //         itemBuilder: (context, index) {
-        //           var item = valutaData[index];
-        //           return GestureDetector(
-        //             onTap: () {
-        //               setState(() {
-        //                 if (selectedRowId == int.parse(item['id']!)) {
-        //                   selectedRowId = null; // Deselect if already selected
-        //                 } else {
-        //                   selectedRowId = int.parse(item['id']!);
-        //                 }
-        //               });
-        //             },
-        //             child: Container(
-        //               color: selectedRowId == int.parse(item['id']!)
-        //                   ? Colors.yellow.withOpacity(0.2) // Selected row color
-        //                   : Colors.transparent,
-        //               padding: EdgeInsets.symmetric(vertical: 16.0),
-        //               child: ListTile(
-        //                 title: Text(item['valuta'] ?? ''),
-        //               ),
-        //             ),
-        //           );
-        //         },
-        //       ),
-        //     ),
-        //   ],
-        // ),
       ),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -169,6 +138,7 @@ class ValutaState extends State<Valuta> {
             SizedBox(width: 10),
           ],
           FloatingActionButton(
+            backgroundColor: Theme.of(context).colorScheme.secondary,
             onPressed: () {
               // Open dialog to add new valuta
               showDialog(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'main.dart';
+import 'package:http/http.dart' as http;
+
 
 class LoginPage extends StatefulWidget {
   @override
@@ -42,6 +44,68 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = false;
     });
   }
+
+  
+// void _showForgotPasswordDialog() {
+//   final TextEditingController _emailController = TextEditingController();
+
+//   showDialog(
+//     context: context,
+//     builder: (context) {
+//       return AlertDialog(
+//         title: Text('Forgot Your Password?'),
+//         content: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             TextField(
+//               controller: _emailController,
+//               decoration: InputDecoration(labelText: 'Email'),
+//             ),
+//           ],
+//         ),
+//         actions: [
+//           TextButton(
+//             onPressed: () {
+//               Navigator.pop(context); // Close the dialog
+//             },
+//             child: Text('Cancel'),
+//           ),
+//           TextButton(
+//   onPressed: () async {
+//     print("Submitting forgot password request...");
+//     final result = await ApiService.forgotPassword(
+//       _emailController.text,
+//     );
+//     print(result); // Check the response
+
+//     // Show success or error message based on result
+//     String message = result['message'];
+//     showDialog(
+//       context: context,
+//       builder: (context) {
+//         return AlertDialog(
+//           title: Text(result['success'] ? 'Success' : 'Error'),
+//           content: Text(message),
+//           actions: [
+//             TextButton(
+//               onPressed: () {
+//                 Navigator.pop(context);
+//               },
+//               child: Text('OK'),
+//             ),
+//           ],
+//         );
+//       },
+//     );
+//     Navigator.pop(context); // Close the Forgot Password dialog
+//   },
+//   child: Text('Submit'),
+// ),
+
+//         ],
+//       );
+    // },
+  // );
 
 
 
@@ -85,6 +149,12 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: _login,
                     child: Text('Login'),
                   ),
+            // SizedBox(height: 10),
+            // // Forgot Password link
+            // TextButton(
+            //   onPressed: _showForgotPasswordDialog,
+            //   child: Text('Forgot your password?', style: TextStyle(color: Colors.blue)),
+            // ),
           ],
         ),
       ),

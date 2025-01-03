@@ -222,6 +222,30 @@ static Future<void> updateUserPassword(int id, String newPassword) async {
   }
 }
 
+ static Future<Map<String, dynamic>> forgotPassword(String email) async {
+  print('Sending password reset request for email: $email');
+  final response = await http.post(
+    Uri.parse('https://Sakojadi2.pythonanywhere.com/password_reset/'),
+    body: {
+      'email': email,
+    },
+  );
+  print('Response status: ${response.statusCode}');
+  print('Response body: ${response.body}');
+
+  if (response.statusCode == 200) {
+    return {
+      'success': true,
+      'message': 'Check your email for password reset instructions.',
+    };
+  } else {
+    return {
+      'success': false,
+      'message': 'Failed to send password reset email. Please try again.',
+    };
+  }
+}
+
 
 
 

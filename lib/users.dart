@@ -96,6 +96,8 @@ void _showError(String message) {
     children: [
       SizedBox(height: 20),
       Expanded(
+        child:SingleChildScrollView(
+        scrollDirection: Axis.vertical,
         child: Table(
            border: TableBorder(
             horizontalInside: BorderSide(
@@ -135,6 +137,7 @@ void _showError(String message) {
           }).toList(),
               ),
             ),
+      ),
           ],
         ),
       ),
@@ -211,6 +214,7 @@ void _showError(String message) {
             SizedBox(width: 10),
           ],
           FloatingActionButton(
+            backgroundColor: Theme.of(context).colorScheme.secondary,
             onPressed: () {
               // Open dialog to add new user
               showDialog(

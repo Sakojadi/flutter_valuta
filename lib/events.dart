@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
+import 'package:intl/intl.dart';
+
 
 class TransactionsPage extends StatefulWidget {
   @override
@@ -136,6 +138,14 @@ class TransactionsPageState extends State<TransactionsPage> {
     fetchValutas();
   }
 
+  String formatDate(String dateString) {
+  // Parse the original date string into a DateTime object
+  final DateTime dateTime = DateTime.parse(dateString);
+  final DateFormat formatter = DateFormat('dd/MM/yy');
+  
+  return formatter.format(dateTime);
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -165,6 +175,8 @@ class TransactionsPageState extends State<TransactionsPage> {
                   ? const Center(child: Text('No transactions available'))
                   : SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
+                      child:SingleChildScrollView(
+                      scrollDirection: Axis.vertical,
                       child: DataTable(
                         headingRowColor: MaterialStateColor.resolveWith((states) =>Theme.of(context).colorScheme.secondary),
                         border: TableBorder.all(color: Colors.black),
@@ -184,7 +196,7 @@ class TransactionsPageState extends State<TransactionsPage> {
                               (states) => isSelected ? Colors.blue.withOpacity(0.2) : Colors.transparent,
                             ),
                             cells: [
-                              DataCell(Text(item['date'] ?? ''), onTap: () => _selectRow(item['id'])),
+                              DataCell(Text(formatDate(item['date'] ?? '')), onTap: () => _selectRow(item['id'])),
                               DataCell(Text(item['transaction_type'] ?? ''), onTap: () => _selectRow(item['id'])),
                               DataCell(Text(item['user'] ?? ''), onTap: () => _selectRow(item['id'])),
                               DataCell(Text(item['currency'] ?? ''), onTap: () => _selectRow(item['id'])),
@@ -196,6 +208,7 @@ class TransactionsPageState extends State<TransactionsPage> {
                         }).toList(),
                       ),
                     ),
+                ),
             ),
           ),
         ],
@@ -242,21 +255,6 @@ class TransactionsPageState extends State<TransactionsPage> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // DropdownButton<String>(
-                //   isExpanded: true,
-                //   value: tempSelectedUser,
-                //   items: userData.map((user) {
-                //     return DropdownMenuItem<String>(
-                //       value: user['user'],
-                //       child: Text(user['user']),
-                //     );
-                //   }).toList(),
-                //   onChanged: (value) {
-                //     setDialogState(() {
-                //       tempSelectedUser = value!;
-                //     });
-                //   },
-                // ),
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4),
@@ -272,7 +270,7 @@ class TransactionsPageState extends State<TransactionsPage> {
                     return DropdownMenuItem<String>(
                       value: item['user'], // Use valuta name as value
                       child: Text(item['user'],),
-                    );
+                    );  
                   }).toList(),
                   onChanged: (String? value) {
                     setDialogState(() {
@@ -284,21 +282,6 @@ class TransactionsPageState extends State<TransactionsPage> {
             ),
                 const SizedBox(height: 20),
                 const SizedBox(height: 10),
-                // DropdownButton<String>(
-                //   isExpanded: true,
-                //   value: tempSelectedValuta,
-                //   items: valutaList.map((valuta) {
-                //     return DropdownMenuItem<String>(
-                //       value: valuta['valuta'],
-                //       child: Text(valuta['valuta']),
-                //     );
-                //   }).toList(),
-                //   onChanged: (value) {
-                //     setDialogState(() {
-                //       tempSelectedValuta = value!;
-                //     });
-                //   },
-                // ),
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4),
