@@ -164,6 +164,39 @@ class MainPageState extends State<MainPage> {
     });
   }
 
+  Future<void> fetchLatestRate(String valuta, String trans) async {
+    try {
+      final latestRate = await ApiService.fetchLatestRateFromTransactions(valuta, trans); // Assuming this method exists
+      setState(() {
+        _kursController.text = latestRate?.toString() ?? ''; // Update the rate field, or leave it empty if not found
+      });
+    } catch (e) {
+      print('Error fetching latest rate: $e');
+    }
+  }
+  
+  void _onValutaSelected() async {
+    
+  if (_selectedItem != null && _selectedButton != null)  {
+    try {
+      print("lol hello: $_selectedItem");
+      // Fetch the latest rate from the transactions for the selected valuta
+      double? latestRate = await ApiService.fetchLatestRateFromTransactions(_selectedItem, _selectedButton!);
+      if (latestRate != null) {
+        // If a rate is found, update the rate field (Kurs)
+        _kursController.text = latestRate.toStringAsFixed(2);
+      } else {
+        // If no rate found, leave the field empty or handle as needed
+        _kursController.clear();
+      }
+    } catch (e) {
+      print('Error fetching latest rate: $e');
+    }
+  }
+  
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -195,6 +228,7 @@ class MainPageState extends State<MainPage> {
                         onTap: () {
                           setState(() {
                             _selectedButton = 'up';
+                            _onValutaSelected();
                           });
                         },
                         child: Container(
@@ -218,6 +252,7 @@ class MainPageState extends State<MainPage> {
                         onTap: () {
                           setState(() {
                             _selectedButton = 'down';
+                            _onValutaSelected();
                           });
                         },
                         child: Container(
@@ -272,8 +307,9 @@ class MainPageState extends State<MainPage> {
                   }).toList(),
                   onChanged: (String? newValue) {
                     setState(() {
-                      _selectedItem = newValue; // Save the selected valuta name
-                    });
+                      _selectedItem = newValue; 
+                      _onValutaSelected();
+                                          });
                   },
                 ),
               ),

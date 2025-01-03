@@ -246,6 +246,41 @@ static Future<void> updateUserPassword(int id, String newPassword) async {
   }
 }
 
+static Future<double?> fetchLatestRateFromTransactions(String? valuta, String transactionType) async {
+  try {
+    if(transactionType == "up"){
+      transactionType = "buy";
+    }
+    else{
+      transactionType = "sell";
+    }
+    final transactions = await fetchTransactions();
+    print(' transactions: $transactions');
+    print('valuta: $valuta, transactionType: $transactionType');
+
+
+    // Filter transactions based on both valuta and transaction type
+    final filteredTransactions = transactions
+        .where((transaction) => transaction['currency'] == valuta && transaction['transaction_type'] == transactionType)
+        .toList();
+
+    print('Filtered transactions: $filteredTransactions');
+    if (filteredTransactions.isEmpty) {
+      return null;  // Return null if no transactions match the criteria
+    }
+
+    // Find the latest transaction based on the date
+    final latestTransaction = filteredTransactions.reduce((a, b) {
+      return DateTime.parse(a['date']).isAfter(DateTime.parse(b['date'])) ? a : b;
+    });
+
+    // Return the latest rate (Курс) for the selected transaction type
+    return double.tryParse(latestTransaction['rate'].toString());
+  } catch (e) {
+    throw Exception('Error fetching latest rate from transactions: $e');
+  }
+}
+
 
 
 

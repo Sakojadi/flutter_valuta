@@ -139,7 +139,7 @@ class Kassa extends State<KassaPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: Center(child: Text('KASSA'))),
+        appBar: AppBar(title: Text('KASSA')),
         body: Center(child: CircularProgressIndicator()),
       );
     }
