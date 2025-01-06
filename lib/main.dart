@@ -7,13 +7,28 @@ import 'kassa.dart';
 import 'users.dart';
 import 'api_service.dart'; 
 import 'login.dart';
+import 'falling_dollars.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'app_localizations.dart';
+
 
 void main() {
   runApp(MyApp());
 }
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class _MyAppState extends State<MyApp> {
+  Locale _locale = Locale('en');  // Default language is English
+
+  // Change language
+  void changeLanguage(String languageCode) {
+    setState(() {
+      _locale = Locale(languageCode); // Set the new language
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,29 +36,36 @@ class MyApp extends StatelessWidget {
       title: 'Valuta',
       theme: ThemeData(
         brightness: Brightness.dark,
-        fontFamily: 'Georgia',
         useMaterial3: true,
         primaryColor: Colors.yellow[700]!,
         colorScheme: ColorScheme.dark(
           primary: Colors.yellow[700]!,
           secondary: Colors.teal[300]!,
-          background: Colors.grey[900]!,
-          surface: Colors.grey[800]!,
+          surface: Color.fromARGB(255, 18, 18, 18),
           error: Colors.redAccent,
           onPrimary: Colors.black,
           onSecondary: Colors.black,
-          onBackground: Colors.white,
           onSurface: Colors.white,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.yellow[700]!, // Button background color
-            foregroundColor: Colors.black,       // Button text color
-            elevation: 4.0,                      // Shadow for button
+            backgroundColor: Colors.yellow[700],
+            foregroundColor: Colors.black,
+            elevation: 4.0,
           ),
         ),
       ),
-      home: LoginPage(),
+      locale: _locale,  // Set the current locale
+      supportedLocales: [
+        Locale('en', 'US'), // English
+        Locale('ru', 'RU'), // Russian
+      ],
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home: LoginPage(changeLanguage: changeLanguage),  // Pass the language change function to the LoginPage
     );
   }
 }
@@ -52,22 +74,26 @@ class MyApp extends StatelessWidget {
 
 class MainPage extends StatefulWidget {
   final String username;
+  final Function(String) changeLanguage;
 
-  MainPage({required this.username});
+  MainPage({required this.username, required this.changeLanguage});
 
   @override
   MainPageState createState() => MainPageState();
+
 }
 
 class MainPageState extends State<MainPage> {
   bool _isRailOpen = false;
-  int _selectedIndex = 1;
+  int _selectedIndex = 0;
   String? _selectedItem;
   String? _selectedButton;
   final TextEditingController _kolichestvoController = TextEditingController();
   final TextEditingController _kursController = TextEditingController();
   final TextEditingController _obshiyController = TextEditingController();
   List<Map<String, dynamic>> _valutaList = [];
+  bool isEnglishSelected = true; // Initially set to English
+  
 
   bool _isKolichestvoValid = true;
   bool _isKursValid = true;
@@ -102,7 +128,7 @@ class MainPageState extends State<MainPage> {
 
     // Pass the selected valuta name (text) for the transaction
     final result = await ApiService.addTransaction(
-      widget.username,
+      // widget.username,
       transactionType,
       _selectedItem ?? '',  // Pass the valuta name (text)
       _kolichestvoController.text,
@@ -136,6 +162,12 @@ class MainPageState extends State<MainPage> {
     _kolichestvoController.addListener(_calculateResult);
     _kursController.addListener(_calculateResult);
     fetchValutas();
+     if (widget.changeLanguage == 'ru') {
+      isEnglishSelected = false; // Russian is selected
+    } else {
+      isEnglishSelected = true; // Default to English
+    }
+  
   }
 
   @override
@@ -197,11 +229,12 @@ class MainPageState extends State<MainPage> {
 }
 
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Главная'),
+        title: Text(AppLocalizations.of(context, 'main')),
         leading: IconButton(
           icon: Icon(Icons.menu),
           onPressed: () {
@@ -213,6 +246,11 @@ class MainPageState extends State<MainPage> {
       ),
       body: Stack(
         children: [
+          // IgnorePointer(
+          //   ignoring: true, // Allow interactions with elements above
+          //   child: FallingDollarsBackground(), // Animated background
+          // ),
+          
           // Main content
           SingleChildScrollView(
             child: Padding(
@@ -242,7 +280,7 @@ class MainPageState extends State<MainPage> {
                           padding: EdgeInsets.all(8.0),
                           child: Icon(
                             Icons.arrow_upward,
-                            color: _selectedButton == 'up' ? Colors.white : Colors.black,
+                            color: Colors.white ,
                             size: 36.0,
                           ),
                         ),
@@ -266,7 +304,7 @@ class MainPageState extends State<MainPage> {
                           padding: EdgeInsets.all(8.0),
                           child: Icon(
                             Icons.arrow_downward,
-                            color: _selectedButton == 'down' ? Colors.white : Colors.black,
+                            color: Colors.white,
                             size: 36.0,
                           ),
                         ),
@@ -288,7 +326,7 @@ class MainPageState extends State<MainPage> {
                 child: DropdownButton<String>(
                   value: _selectedItem, // Keep the selected valuta name
                   hint: Text(
-                    'Select an option',
+                    AppLocalizations.of(context, 'select'),
                     style: TextStyle(
                       color: Theme.of(context).textTheme.bodyLarge?.color, // Match text color
                     ),
@@ -328,7 +366,7 @@ class MainPageState extends State<MainPage> {
                       ),
                     ],
                     decoration: InputDecoration(
-                      labelText: 'Количество',
+                      labelText: AppLocalizations.of(context, 'quantity'),
                       border: OutlineInputBorder(),
                       focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(
@@ -356,7 +394,7 @@ class MainPageState extends State<MainPage> {
                       ),
                     ],
                     decoration: InputDecoration(
-                      labelText: 'Курс',
+                      labelText: AppLocalizations.of(context, 'rate'),
                       border: OutlineInputBorder(),
                       focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(
@@ -379,7 +417,7 @@ class MainPageState extends State<MainPage> {
                     controller: _obshiyController,
                     readOnly: true,
                     decoration: InputDecoration(
-                      labelText: 'Общий',
+                      labelText: AppLocalizations.of(context, 'total'),
                       border: OutlineInputBorder(),
                       focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(
@@ -404,7 +442,7 @@ class MainPageState extends State<MainPage> {
                         addTransaction();
                       }
                     },
-                    child: Text('Добавить'),
+child: Text(AppLocalizations.of(context, 'add')),
 
             ),
                   SizedBox(height: 20),
@@ -417,7 +455,7 @@ class MainPageState extends State<MainPage> {
                       );
                       resetState();
                     },
-                    child: Text('События'),
+                    child: Text(AppLocalizations.of(context, 'events')),
                   ),
                 ],
               ),
@@ -425,107 +463,204 @@ class MainPageState extends State<MainPage> {
           ),
 
           // Navigation Rail Overlay
-          if (_isRailOpen)
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  _isRailOpen = false; // Close NavigationRail when tapping outside
-                });
-              },
-              child: Container(
-                color: Colors.black.withOpacity(0.5), // Dim background
-              ),
-            ),
-          AnimatedPositioned(
-            duration: Duration(milliseconds: 300),
-            left: _isRailOpen ? 0 : -200, // Slide in/out effect
-            top: 0,
-            bottom: 0,
-            child: Material(
-              elevation: 8,
-              child: Container(
-                width: 200, // Fixed size for the NavigationRail
-                color: Colors.blueGrey[50],
-                child: NavigationRail(
-                  selectedIndex: _selectedIndex,
-                  onDestinationSelected: (int index) {
-                    setState(() {
-                      _selectedIndex = index;
-                      _selectedIndex = 1;
-                      switch(index){
-                      case(0): // Exit/Logout
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginPage()), // Go back to LoginPage
-                        (route) => false, // Remove all routes from the stack
-                      );
-                      break;
-                      case(2):
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => Valuta()));
-                          resetState();
-                          fetchValutas();
-                        break;
-                      case(3):
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => Reports()));
-                        resetState();
-                        break;
-                      case(4):
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => KassaPage()));
-                        resetState();
-                        break;
-                      case(5):
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => Users(username: widget.username)));
-                        resetState();
-                        break;
-                      case(6):
-                      showDeleteConfirmationDialog(context);
-                      break;
-                      }
-                      _isRailOpen = false; });
-                  },
-                  extended: true,
-                  destinations: [
-                    NavigationRailDestination(
-                    icon: Icon(Icons.exit_to_app, color: Colors.red), // Exit icon
-                    label: Text('Logout'),
-                  ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.home),
-                      label: Text('Главная'),
+          Stack(
+  children: [
+    // Dimmed background when rail is open
+    if (_isRailOpen)
+      GestureDetector(
+        onTap: () {
+          setState(() {
+            _isRailOpen = false; // Close NavigationRail when tapping outside
+          });
+        },
+        child: Container(
+          color: Colors.black.withOpacity(0.5), // Dim background
+          height: MediaQuery.of(context).size.height, // Full screen height
+          width: MediaQuery.of(context).size.width, // Full screen width
+        ),
+      ),
+    // NavigationRail with shadow
+    AnimatedPositioned(
+      duration: Duration(milliseconds: 300),
+      left: _isRailOpen ? 0 : -200, // Slide in/out effect
+      top: 0,
+      bottom: 0,
+      child: Material(
+        elevation: 8, // Shadow effect
+        child: Container(
+          width: 200, // Fixed size for the NavigationRail
+          height: MediaQuery.of(context).size.height, // Full screen height
+          color: Colors.black, // Background color for the rail
+          child: Column(
+            children: [
+              // Upper section with profile and logout
+              Container(
+                color: Theme.of(context).colorScheme.surface, // Entirely yellow background
+                padding: EdgeInsets.all(16), // Padding around profile and button
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          foregroundColor: Colors.white,
+                          backgroundColor: Theme.of(context).colorScheme.surface,
+                          child: Icon(Icons.person), // Profile icon
+                        ),
+                        SizedBox(width: 8), // Spacing between icon and text
+                        Expanded(
+                          child: Text(
+                            widget.username, // Display the username
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis, // Handle long usernames
+                          ),
+                        ),
+                      ],
                     ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.money),
-                      label: Text('Валюта'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.info),
-                      label: Text('Отчеты'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.money),
-                      label: Text('Касса'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.person),
-                      label: Text('Пользователи'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.delete),
-                      label: Text('Очистить'),
+                    SizedBox(height: 16), // Space between profile and logout button
+                    SizedBox(
+                      width: double.infinity, // Full width for logout button
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.exit_to_app,
+                          color: Colors.red,
+                          size: 36, // Bigger size for the logout icon
+                        ),
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (context) => LoginPage(changeLanguage: widget.changeLanguage)), // Go back to LoginPage
+                            (route) => false, // Clear navigation stack
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
+              // Remaining destinations
+              Expanded(
+                child: NavigationRail(
+                  backgroundColor: Colors.yellow[700], // Background for main destinations
+                  indicatorColor: Colors.black,
+                  selectedIndex: _selectedIndex,
+                  onDestinationSelected: (int index) {
+  setState(() {
+    _selectedIndex = index;
+    _isRailOpen = false;
+    _selectedIndex = 0;
+  });
+
+  if (index == 1) {
+    () async {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => Valuta()),
+      );
+
+      if (result == true) {
+        fetchValutas(); // Trigger fetchValutas if something was added or deleted
+      }
+      resetState();
+    }(); // Immediately invoke the async function
+  } else if (index == 2) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Reports()),
+    );
+    resetState();
+  } else if (index == 3) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => KassaPage()),
+    );
+    resetState();
+  } else if (index == 4) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => Users(username: widget.username)),
+    );
+    resetState();
+  } else if (index == 5) {
+    showDeleteConfirmationDialog(context);
+  }
+
+                  },
+                  extended: true,
+                  destinations: [
+                    NavigationRailDestination(
+                      icon: Icon(Icons.home, color: Colors.white),
+                      label: Text(AppLocalizations.of(context, 'main'), style: TextStyle(color: Colors.black)),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.money, color: Colors.black),
+                      label: Text(AppLocalizations.of(context, 'currency'), style: TextStyle(color: Colors.black)),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.info, color: Colors.black),
+                      label: Text(AppLocalizations.of(context, 'reports'), style: TextStyle(color: Colors.black)),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.money, color: Colors.black),
+                      label: Text(AppLocalizations.of(context, 'cash'), style: TextStyle(color: Colors.black)),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.person, color: Colors.black),
+                      label: Text(AppLocalizations.of(context, 'users'), style: TextStyle(color: Colors.black)),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.delete, color: Colors.black),
+                      label: Text(AppLocalizations.of(context, 'clear'), style: TextStyle(color: Colors.black)),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+  padding: const EdgeInsets.all(8.0),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      // English button
+      ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isEnglishSelected ? Colors.yellow[700] : Colors.grey,
+        ),
+        onPressed: () {
+          setState(() {
+            isEnglishSelected = true;  // Set English to selected
+          });
+          widget.changeLanguage('en');  // Change language to English
+        },
+        child: Text('ENG'),
+      ),
+      SizedBox(width: 8),
+      // Russian button
+      ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: !isEnglishSelected ? Colors.yellow[700] : Colors.grey,
+        ),
+        onPressed: () {
+          setState(() {
+            isEnglishSelected = false;  // Set Russian to selected
+          });
+          widget.changeLanguage('ru');  // Change language to Russian
+        },
+        child: Text('RU'),
+      ),
+    ],
+  ),
+)
+
+            ],
           ),
+        ),
+      ),
+    ),
+  ],
+),
+
         ],
       ),
     );
@@ -551,16 +686,16 @@ void showDeleteConfirmationDialog(BuildContext context) {
     barrierDismissible: false, // Prevent closing the dialog by tapping outside
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text('Delete all data?'),
+        title: Text(AppLocalizations.of(context, 'deleteAll')),
         actions: <Widget>[
           TextButton(
-            child: Text('No'),
+            child: Text(AppLocalizations.of(context, 'no')),
             onPressed: () {
               Navigator.of(context).pop(); // Close the dialog
             },
           ),
           TextButton(
-            child: Text('Yes'),
+            child: Text(AppLocalizations.of(context, 'yes')),
             onPressed: () {
               deleteAllData();
               Navigator.of(context).pop(); // Close the dialog

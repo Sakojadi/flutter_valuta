@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
+import 'dart:async'; // For using Timer
+import 'app_localizations.dart';
 
 class Valuta extends StatefulWidget {
   @override
@@ -8,8 +10,10 @@ class Valuta extends StatefulWidget {
 
 class ValutaState extends State<Valuta> {
   List<Map<String, dynamic>> valutaData = []; // To store the fetched data
+  Map<String, double> currencyRates = {}; // To store currency rates
   int? selectedRowId; // To track the selected row ID
   final TextEditingController _valutaController = TextEditingController();
+  Timer? _timer; // Timer for updating the data every 5 seconds
 
   // Fetch all valutas from the API
   Future<void> fetchValutas() async {
@@ -21,6 +25,25 @@ class ValutaState extends State<Valuta> {
     } catch (e) {
       _showError('Error fetching valutas: $e');
     }
+  }
+
+  // Fetch real-time exchange rates for currencies
+  Future<void> fetchCurrencyRates() async {
+    try {
+      final response = await ApiService.fetchCurrencyRates('4D1QhBl3DxM9Df5QU0IixHWazbDCCjxYTtGfkhei4fa4313b');
+      setState(() {
+        currencyRates = response; // Update currency rates
+      });
+    } catch (e) {
+      _showError('Error fetching currency rates: $e');
+    }
+  }
+
+  // Set up a Timer to fetch data every 0 seconds
+  void startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 10), (Timer t) {
+      fetchCurrencyRates(); // Fetch the currency rates every 10 seconds
+    });
   }
 
   // Add a new valuta through ApiService
@@ -49,82 +72,118 @@ class ValutaState extends State<Valuta> {
   }
 
   // Display error messages
-  void _showError(String message) {
+void _showError(String message) {
+  if (mounted) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
+}
 
   @override
   void initState() {
     super.initState();
     fetchValutas();
+    fetchCurrencyRates(); // Fetch the currency rates initially
+    startTimer(); // Start the timer for periodic updates
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Cancel the timer when the widget is disposed
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Valuta Window'),
+        title: Text(AppLocalizations.of(context, 'currency')),
+        centerTitle: true,
         leading: IconButton(
-      icon: Icon(Icons.arrow_back),
-        onPressed: () {
-          Navigator.pop(context);
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context, true);
             setState(() {
-      selectedRowId = null;
-    });},
+              selectedRowId = null;
+            });
+          },
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-  crossAxisAlignment: CrossAxisAlignment.stretch,
-  children: [
-    SizedBox(height: 20),
-    Expanded(
-      child:SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: Table(
-        border: TableBorder(
-          horizontalInside: BorderSide(
-            color: Theme.of(context).colorScheme.surface, // Color of the horizontal border
-            width: 4, // Thickness of the border
-          ),
-          verticalInside: BorderSide.none, // Remove vertical borders if needed
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(height: 20),
+            Expanded(
+  child: SingleChildScrollView(
+    scrollDirection: Axis.vertical,
+    child: Table(
+      border: TableBorder(
+        horizontalInside: BorderSide(
+          color: Theme.of(context).colorScheme.surface,
+          width: 4,
         ),
-        children: valutaData.map<TableRow>((item) {
-          return TableRow(
-            children: [
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    if (selectedRowId == int.parse(item['id']!)) {
-                      selectedRowId = null; // Deselect if already selected
-                    } else {
-                      selectedRowId = int.parse(item['id']!); // Select the current row
-                    }
-                  });
-                },
-                child: Container(
+        verticalInside: BorderSide.none,
+      ),
+      children: valutaData.map<TableRow>((item) {
+        String currency = item['valuta'] ?? '';
+        double rate = currencyRates[currency.toLowerCase()] ?? 0.0;  // Convert currency code to lowercase here
+
+        return TableRow(
+          children: [
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  if (selectedRowId == int.parse(item['id']!)) {
+                    selectedRowId = null;
+                  } else {
+                    selectedRowId = int.parse(item['id']!);
+                  }
+                });
+              },
+              child: Container(
+                margin: EdgeInsets.symmetric(vertical: 8.0),
+                decoration: BoxDecoration(
                   color: selectedRowId == int.parse(item['id']!)
-                      ? Theme.of(context).colorScheme.secondary.withOpacity(0.6) // Highlighted row
-                      : Theme.of(context).primaryColor, // Regular row color
-                  padding: EdgeInsets.symmetric(vertical: 16.0),
-                  alignment: Alignment.center,
-                  child: Text(
-                    item['valuta'] ?? '',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.black),
-                  ),
+                      ? Theme.of(context).colorScheme.secondary.withOpacity(0.6)
+                      : Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(12.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 6.0,
+                      offset: Offset(0, 3),
+                    ),
+                  ],
+                ),
+                padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
+                alignment: Alignment.center,
+                child: Column(
+                  children: [
+                    Text(
+                      currency,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16, color: Colors.black),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      '${AppLocalizations.of(context, 'rate')}: ${rate.toStringAsFixed(2)}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14, color: Colors.black54),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          );
-        }).toList(),
-      ),
-      ),
+            ),
+          ],
+        );
+      }).toList(),
     ),
-  ],
-),
+  ),
+)
 
+          ],
+        ),
       ),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -145,27 +204,27 @@ class ValutaState extends State<Valuta> {
                 context: context,
                 builder: (context) {
                   return AlertDialog(
-                    title: Text('Add Valuta'),
+                    title: Text(AppLocalizations.of(context, 'add')),
                     content: TextField(
                       controller: _valutaController,
                       decoration: InputDecoration(
-                        labelText: 'Enter Valuta',
+                        labelText: AppLocalizations.of(context, 'enterVal'),
                         border: OutlineInputBorder(),
                       ),
                     ),
                     actions: [
                       TextButton(
-                        onPressed: () => Navigator.pop(context), // Close dialog
-                        child: Text('Cancel'),
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(AppLocalizations.of(context, 'cancel')),
                       ),
                       ElevatedButton(
                         onPressed: () {
                           if (_valutaController.text.isNotEmpty) {
                             addNewValuta(_valutaController.text);
                           }
-                          Navigator.pop(context); // Close dialog after adding
+                          Navigator.pop(context);
                         },
-                        child: Text('Add'),
+                        child: Text(AppLocalizations.of(context, 'add')),
                       ),
                     ],
                   );

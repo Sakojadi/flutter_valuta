@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 import 'package:intl/intl.dart';
-
+import 'app_localizations.dart';
 
 class TransactionsPage extends StatefulWidget {
   @override
@@ -13,8 +13,8 @@ class TransactionsPageState extends State<TransactionsPage> {
   List<Map<String, dynamic>> filteredTransactionData = [];
   List<Map<String, dynamic>> valutaList = [];
   List<Map<String, dynamic>> userData = [];
-  String selectedValutaFilter = "Filter by Valuta";
-  String selectedUserFilter = "Filter by User";
+  String selectedValutaFilter = "-";
+  String selectedUserFilter = "-";
   String? selectedTransactionTypeFilter; 
   int? selectedRowId;
 
@@ -40,10 +40,12 @@ class TransactionsPageState extends State<TransactionsPage> {
       return valuta.map((key, value) => MapEntry(key, value.toString()));
     }).toList();
 
-    setState(() {
-      // Add the blank option at the beginning
-      valutaList = [{'valuta': 'Filter by Valuta'}] + formattedValutas;
-    });
+   if (mounted) {
+  setState(() {
+    valutaList = [{'valuta': '-'}] + formattedValutas;
+  });
+}
+
   } catch (e) {
     _showError('Error fetching valutas: $e');
   }
@@ -53,12 +55,14 @@ class TransactionsPageState extends State<TransactionsPage> {
   try {
     // Fetch users from the API
     final fetchedUsers = await ApiService.fetchUsers();
+if (mounted) {
+  setState(() {
+    userData = [{'user': '-'}] + fetchedUsers.map<Map<String, String>>((user) {
+      return {'user': user['username']?.toString() ?? ''};
+    }).toList();
+  });
+}
 
-    setState(() {
-      userData = [{'user': 'Filter by User'}] + fetchedUsers.map<Map<String, String>>((user) {
-        return {'user': user['username']?.toString() ?? ''};
-      }).toList();
-    });
     print(userData);
   } catch (e) {
     _showError('Error fetching users: $e');
@@ -71,8 +75,8 @@ class TransactionsPageState extends State<TransactionsPage> {
   void _applyFilter() {
   setState(() {
     filteredTransactionData = transactionData.where((transaction) {
-      final matchesUser = selectedUserFilter == "Filter by User" || transaction['user'] == selectedUserFilter;
-      final matchesValuta = selectedValutaFilter == "Filter by Valuta" || transaction['currency'] == selectedValutaFilter;
+      final matchesUser = selectedUserFilter == "-" || transaction['user'] == selectedUserFilter;
+      final matchesValuta = selectedValutaFilter == "-" || transaction['currency'] == selectedValutaFilter;
       final matchesType = selectedTransactionTypeFilter == null || transaction['transaction_type'] == selectedTransactionTypeFilter;
       return matchesValuta && matchesType && matchesUser;
     }).toList();
@@ -80,9 +84,12 @@ class TransactionsPageState extends State<TransactionsPage> {
 }
 
 
-  void _showError(String message) {
+void _showError(String message) {
+  if (mounted) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
+}
+
 
   Future<void> deleteSelectedTransaction() async {
     if (selectedRowId != null) {
@@ -112,13 +119,16 @@ class TransactionsPageState extends State<TransactionsPage> {
       );
 
       if (updatedTransaction != null) {
-        setState(() {
-          final index = transactionData.indexWhere((transaction) => transaction['id'] == selectedRowId);
-          if (index != -1) {
-            transactionData[index] = updatedTransaction;
-          }
-          _applyFilter();
-        });
+        if (mounted) {
+  setState(() {
+    final index = transactionData.indexWhere((transaction) => transaction['id'] == selectedRowId);
+    if (index != -1) {
+      transactionData[index] = updatedTransaction;
+    }
+    _applyFilter();
+  });
+}
+
 
         try {
           final transactionId = updatedTransaction['id'] as int;
@@ -150,7 +160,7 @@ class TransactionsPageState extends State<TransactionsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transactions'),
+        title: Text(AppLocalizations.of(context, 'trans')),
         leading: IconButton(
       icon: Icon(Icons.arrow_back),
         onPressed: () {
@@ -180,14 +190,14 @@ class TransactionsPageState extends State<TransactionsPage> {
                       child: DataTable(
                         headingRowColor: MaterialStateColor.resolveWith((states) =>Theme.of(context).colorScheme.secondary),
                         border: TableBorder.all(color: Colors.black),
-                        columns: const [
-                          DataColumn(label: Text('Date')),
-                          DataColumn(label: Text('sell/buy')),
-                          DataColumn(label: Text('User')),
-                          DataColumn(label: Text('Currency')),
-                          DataColumn(label: Text('Quantity')),
-                          DataColumn(label: Text('Rate')),
-                          DataColumn(label: Text('Total')),
+                        columns: [
+                          DataColumn(label: Text(AppLocalizations.of(context, 'date'))),
+                          DataColumn(label: Text(AppLocalizations.of(context, 'type'))),
+                          // DataColumn(label: Text(AppLocalizations.of(context, 'users'))),
+                          DataColumn(label: Text(AppLocalizations.of(context, 'currency'))),
+                          DataColumn(label: Text(AppLocalizations.of(context, 'quantity'))),
+                          DataColumn(label: Text(AppLocalizations.of(context, 'rate'))),
+                          DataColumn(label: Text(AppLocalizations.of(context, 'total'))),
                         ],
                         rows: filteredTransactionData.map((item) {
                           final isSelected = selectedRowId == item['id'];
@@ -198,7 +208,7 @@ class TransactionsPageState extends State<TransactionsPage> {
                             cells: [
                               DataCell(Text(formatDate(item['date'] ?? '')), onTap: () => _selectRow(item['id'])),
                               DataCell(Text(item['transaction_type'] ?? ''), onTap: () => _selectRow(item['id'])),
-                              DataCell(Text(item['user'] ?? ''), onTap: () => _selectRow(item['id'])),
+                              // DataCell(Text(item['user'] ?? ''), onTap: () => _selectRow(item['id'])),
                               DataCell(Text(item['currency'] ?? ''), onTap: () => _selectRow(item['id'])),
                               DataCell(Text(item['quantity']?.toString() ?? ''), onTap: () => _selectRow(item['id'])),
                               DataCell(Text(item['rate']?.toString() ?? ''), onTap: () => _selectRow(item['id'])),
@@ -251,35 +261,35 @@ class TransactionsPageState extends State<TransactionsPage> {
       return StatefulBuilder(
         builder: (context, setDialogState) {
           return AlertDialog(
-            title: const Text('Filter Transactions'),
+            title: Text(AppLocalizations.of(context, 'filter')),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                  color: Theme.of(context).primaryColor,
-                ),),
-              padding: const EdgeInsets.symmetric(horizontal: 16.0), // Add inner padding
-              child: DropdownButtonHideUnderline( // Remove the default underline
-                child: DropdownButton<String>(
-                  value: tempSelectedUser,
-                  isExpanded: true,
-                  items: userData.map<DropdownMenuItem<String>>((Map<String, dynamic> item) {
-                    return DropdownMenuItem<String>(
-                      value: item['user'], // Use valuta name as value
-                      child: Text(item['user'],),
-                    );  
-                  }).toList(),
-                  onChanged: (String? value) {
-                    setDialogState(() {
-                      tempSelectedUser = value!; // Save the selected valuta name
-                    });
-                  },
-                ),
-              ),
-            ),
+            // Container(
+            //   decoration: BoxDecoration(
+            //     borderRadius: BorderRadius.circular(4),
+            //   border: Border.all(
+            //       color: Theme.of(context).primaryColor,
+            //     ),),
+            //   padding: const EdgeInsets.symmetric(horizontal: 16.0), // Add inner padding
+            //   child: DropdownButtonHideUnderline( // Remove the default underline
+            //     child: DropdownButton<String>(
+            //       value: tempSelectedUser,
+            //       isExpanded: true,
+            //       items: userData.map<DropdownMenuItem<String>>((Map<String, dynamic> item) {
+            //         return DropdownMenuItem<String>(
+            //           value: item['user'], // Use valuta name as value
+            //           child: Text(item['user'],),
+            //         );  
+            //       }).toList(),
+            //       onChanged: (String? value) {
+            //         setDialogState(() {
+            //           tempSelectedUser = value!; // Save the selected valuta name
+            //         });
+            //       },
+            //     ),
+            //   ),
+            // ),
                 const SizedBox(height: 20),
                 const SizedBox(height: 10),
             Container(
@@ -308,7 +318,7 @@ class TransactionsPageState extends State<TransactionsPage> {
               ),
             ),
                 const SizedBox(height: 20),
-                const Text('Filter by Type:', style: TextStyle(fontSize: 16)),
+                Text(AppLocalizations.of(context, 'filterType'), style: TextStyle(fontSize: 16)),
                 const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -331,9 +341,8 @@ class TransactionsPageState extends State<TransactionsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: Icon(
                           Icons.arrow_upward,
-                          color: tempSelectedTransactionType == "buy"
-                              ? Colors.white
-                              : Colors.black,
+                          color:
+                               Colors.white,
                           size: 36.0,
                         ),
                       ),
@@ -357,9 +366,8 @@ class TransactionsPageState extends State<TransactionsPage> {
                         padding: const EdgeInsets.all(8.0),
                         child: Icon(
                           Icons.arrow_downward,
-                          color: tempSelectedTransactionType == "sell"
-                              ? Colors.white
-                              : Colors.black,
+                          color:
+                               Colors.white,
                           size: 36.0,
                         ),
                       ),
@@ -371,7 +379,7 @@ class TransactionsPageState extends State<TransactionsPage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancel'),
+                child: Text(AppLocalizations.of(context, 'cancel')),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -383,7 +391,7 @@ class TransactionsPageState extends State<TransactionsPage> {
                   });
                   Navigator.of(context).pop();
                 },
-                child: const Text('Apply'),
+                child: Text(AppLocalizations.of(context, 'apply')),
               ),
             ],
           );
@@ -414,45 +422,54 @@ class _EditTransactionDialogState extends State<EditTransactionDialog> {
   String? _selectedValuta;
   String? _selectedUser;
   String? _transactionType;
+@override
+void initState() {
+  super.initState();
 
-  @override
-  void initState() {
-    super.initState();
+  // Initialize controllers with transaction data
+  _quantityController.text = widget.transaction['quantity'] ?? '';
+  _rateController.text = widget.transaction['rate'] ?? '';
+  _totalController.text = widget.transaction['total'] ?? '';
+  _selectedValuta = widget.transaction['currency'];
+  _selectedUser = widget.transaction['user'];
+  _transactionType = widget.transaction['transaction_type'];
 
-    // Initialize controllers with transaction data
-    _quantityController.text = widget.transaction['quantity'] ?? '';
-    _rateController.text = widget.transaction['rate'] ?? '';
-    _totalController.text = widget.transaction['total'] ?? '';
-    _selectedValuta = widget.transaction['currency'];
-    _selectedUser = widget.transaction['user'];
-    _transactionType = widget.transaction['transaction_type'];
+  // Fetch available valutas and users
+  fetchValutas();
+  // fetchUsers();
+}
 
-    // Fetch available valutas
-    fetchValutas();
-    fetchUsers();
+Future<void> fetchValutas() async {
+  try {
+    final valutas = await ApiService.fetchValutas();
+    setState(() {
+      _valutaList = valutas;
+
+      // If selectedValuta is not found in the list, select the first one
+      if (_selectedValuta == null || !_valutaList.any((valuta) => valuta['valuta'] == _selectedValuta)) {
+        _selectedValuta = _valutaList.isNotEmpty ? _valutaList[0]['valuta'] : null;  // Default to the first valuta
+      }
+    });
+  } catch (e) {
+    print('Error fetching valutas: $e');
   }
+}
 
-  Future<void> fetchValutas() async {
-    try {
-      final valutas = await ApiService.fetchValutas();
-      setState(() {
-        _valutaList = valutas;
-      });
-    } catch (e) {
-      print('Error fetching valutas: $e');
-    }
-  }
+// Future<void> fetchUsers() async {
+//   try {
+//     final data = await ApiService.fetchUsers();
+//     setState(() {
+//       _userData = data;
 
-  Future<void> fetchUsers() async {
-    try {
-      final data = await ApiService.fetchUsers();
-      setState(() {
-        _userData = data;
-      });
-    } catch (e) {
-      print('Error fetching users: $e');
-    }
-  }
+//       // If selectedUser is not found in the list, select the first one
+//       if (_selectedUser == null || !_userData.any((user) => user['username'] == _selectedUser)) {
+//         _selectedUser = _userData.isNotEmpty ? _userData[0]['username'] : null;  // Default to the first user
+//       }
+//     });
+//   } catch (e) {
+//     print('Error fetching users: $e');
+//   }
+// }
 
   @override
   void dispose() {
@@ -472,7 +489,7 @@ class _EditTransactionDialogState extends State<EditTransactionDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Edit Transaction'),
+      title: Text(AppLocalizations.of(context, 'edit')),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -488,14 +505,14 @@ class _EditTransactionDialogState extends State<EditTransactionDialog> {
                   },
                   child: Container(
                     decoration: BoxDecoration(
-                      color: _transactionType == 'buy' ? Colors.blueGrey : Colors.transparent,
-                      border: Border.all(color: Colors.blueGrey),
+                      color: _transactionType == 'buy' ? Theme.of(context).primaryColor: Colors.transparent,
+                      border: Border.all(color: Theme.of(context).primaryColor),
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                     padding: EdgeInsets.all(8.0),
                     child: Icon(
                       Icons.arrow_upward,
-                      color: _transactionType == 'buy' ? Colors.white : Colors.black,
+                      color: Colors.white,
                       size: 36.0,
                     ),
                   ),
@@ -509,41 +526,41 @@ class _EditTransactionDialogState extends State<EditTransactionDialog> {
                   },
                   child: Container(
                     decoration: BoxDecoration(
-                      color: _transactionType == 'sell' ? Colors.blueGrey : Colors.transparent,
-                      border: Border.all(color: Colors.blueGrey),
+                      color: _transactionType == 'sell' ? Theme.of(context).primaryColor : Colors.transparent,
+                      border: Border.all(color:Theme.of(context).primaryColor),
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                     padding: EdgeInsets.all(8.0),
                     child: Icon(
                       Icons.arrow_downward,
-                      color: _transactionType == 'sell' ? Colors.white : Colors.black,
+                      color: Colors.white,
                       size: 36.0,
                     ),
                   ),
                 ),
               ],
             ),
-              DropdownButton<String>(
-              value: _selectedUser,
-              isExpanded: true,
-              hint: Text('Select Currency'),
-              items: _userData.map<DropdownMenuItem<String>>((user) {
-                return DropdownMenuItem<String>(
-                  value: user['username'],
-                  child: Text(user['username']),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedUser = value;
-                });
-              },
-            ),
+            //   DropdownButton<String>(
+            //   value: _selectedUser,
+            //   isExpanded: true,
+            //   hint: Text(AppLocalizations.of(context, 'select')),
+            //   items: _userData.map<DropdownMenuItem<String>>((user) {
+            //     return DropdownMenuItem<String>(
+            //       value: user['username'],
+            //       child: Text(user['username']),
+            //     );
+            //   }).toList(),
+            //   onChanged: (value) {
+            //     setState(() {
+            //       _selectedUser = value;
+            //     });
+            //   },
+            // ),
             // Dropdown for Valutas
             DropdownButton<String>(
               value: _selectedValuta,
               isExpanded: true,
-              hint: Text('Select Currency'),
+              hint: Text(AppLocalizations.of(context, 'select')),
               items: _valutaList.map<DropdownMenuItem<String>>((valuta) {
                 return DropdownMenuItem<String>(
                   value: valuta['valuta'],
@@ -561,7 +578,7 @@ class _EditTransactionDialogState extends State<EditTransactionDialog> {
             TextField(
               controller: _quantityController,
               keyboardType: TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(labelText: 'Quantity'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context, 'quantity')),
               onChanged: (_) => _updateTotal(),
             ),
             SizedBox(height: 10),
@@ -569,7 +586,7 @@ class _EditTransactionDialogState extends State<EditTransactionDialog> {
             TextField(
               controller: _rateController,
               keyboardType: TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(labelText: 'Rate'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context, 'rate')),
               onChanged: (_) => _updateTotal(),
             ),
             SizedBox(height: 10),
@@ -577,7 +594,7 @@ class _EditTransactionDialogState extends State<EditTransactionDialog> {
             TextField(
               controller: _totalController,
               readOnly: true,
-              decoration: InputDecoration(labelText: 'Total'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context, 'total')),
             ),
           ],
         ),
@@ -585,7 +602,7 @@ class _EditTransactionDialogState extends State<EditTransactionDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text('Cancel'),
+          child: Text(AppLocalizations.of(context, 'cancel')),
         ),
         ElevatedButton(
           onPressed: () {
@@ -601,7 +618,7 @@ class _EditTransactionDialogState extends State<EditTransactionDialog> {
             };
             Navigator.of(context).pop(updatedTransaction);
           },
-          child: Text('Save'),
+          child: Text(AppLocalizations.of(context, 'save')),
         ),
       ],
     );

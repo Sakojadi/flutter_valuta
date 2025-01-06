@@ -126,6 +126,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.0"
+  flutter_localizations:
+    dependency: "direct main"
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   flutter_sticky_header:
     dependency: "direct main"
     description:
@@ -151,10 +156,10 @@ packages:
     dependency: transitive
     description:
       name: http_parser
-      sha256: "76d306a1c3afb33fe82e2bbacad62a61f409b5634c915fceb0d799de1a913360"
+      sha256: "178d74305e7866013777bab2c3d8726205dc5a4dd935297175b19a23a2e66571"
       url: "https://pub.dev"
     source: hosted
-    version: "4.1.1"
+    version: "4.1.2"
   image:
     dependency: transitive
     description:
@@ -167,10 +172,10 @@ packages:
     dependency: "direct main"
     description:
       name: intl
-      sha256: "3bc132a9dbce73a7e4a21a17d06e1878839ffbf975568bc875c60537824b0c4d"
+      sha256: d6f56758b7d3014a48af9701c085700aac781a92a87a62b1333b46d8879661cf
       url: "https://pub.dev"
     source: hosted
-    version: "0.18.1"
+    version: "0.19.0"
   json_annotation:
     dependency: transitive
     description:
@@ -304,6 +309,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
+  syncfusion_flutter_charts:
+    dependency: "direct main"
+    description:
+      name: syncfusion_flutter_charts
+      sha256: "65ba3d7c33fe2a0fb2252f13228230de42793349b099d97d1ab5e7420b22b272"
+      url: "https://pub.dev"
+    source: hosted
+    version: "28.1.37"
+  syncfusion_flutter_core:
+    dependency: transitive
+    description:
+      name: syncfusion_flutter_core
+      sha256: aa526af3b07691a25ea2700991a6a333ef35abfb6e6679002a26d13d1baa138a
+      url: "https://pub.dev"
+    source: hosted
+    version: "28.1.37"
   term_glyph:
     dependency: transitive
     description:

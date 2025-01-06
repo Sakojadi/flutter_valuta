@@ -62,7 +62,7 @@ static Future<List<Map<String, dynamic>>> fetchUsers() async {
   
 
   // Add a new user
-  static Future<void> addNewUser(String username, String password) async {
+  static Future<void> addNewUser(String username, String password, String email) async {
     try {
       final response = await http.post(
         Uri.parse('${_baseUrl}register/'),
@@ -70,6 +70,7 @@ static Future<List<Map<String, dynamic>>> fetchUsers() async {
         body: json.encode({
           'username': username,
           'password': password,
+          'email':email,
         }),
       );
 
@@ -116,7 +117,7 @@ static Future<List<Map<String, dynamic>>> fetchUsers() async {
     }
   }
 
-  static Future<bool> addTransaction(String user, String transactionType, String currency, String quantity, String rate, String total) async {
+  static Future<bool> addTransaction(String transactionType, String currency, String quantity, String rate, String total) async {
   try {
     final response = await http.post(
       Uri.parse('${_baseUrl}transactions/'),
@@ -124,7 +125,7 @@ static Future<List<Map<String, dynamic>>> fetchUsers() async {
         'Content-Type': 'application/json',
       },
       body: json.encode({
-        'user': user,
+        // 'user': user,
         'transaction_type': transactionType,
         'currency': currency,
         'quantity': quantity,
@@ -132,10 +133,14 @@ static Future<List<Map<String, dynamic>>> fetchUsers() async {
         'total': total,
       }),
     );
+    if (response.statusCode == 403) {
+  print('Error details: ${response.body}');
+}
 
     if (response.statusCode == 201) {
       return true;  // Success
-    } else {
+    }
+     else {
       print('Failed to add transaction: ${response.statusCode}');
       return false;
     }
@@ -144,6 +149,7 @@ static Future<List<Map<String, dynamic>>> fetchUsers() async {
     return false;
   }
 }
+
 static Future<List<Map<String, dynamic>>> fetchTransactions() async {
   try {
     final response = await http.get(
@@ -222,30 +228,6 @@ static Future<void> updateUserPassword(int id, String newPassword) async {
   }
 }
 
- static Future<Map<String, dynamic>> forgotPassword(String email) async {
-  print('Sending password reset request for email: $email');
-  final response = await http.post(
-    Uri.parse('https://Sakojadi2.pythonanywhere.com/password_reset/'),
-    body: {
-      'email': email,
-    },
-  );
-  print('Response status: ${response.statusCode}');
-  print('Response body: ${response.body}');
-
-  if (response.statusCode == 200) {
-    return {
-      'success': true,
-      'message': 'Check your email for password reset instructions.',
-    };
-  } else {
-    return {
-      'success': false,
-      'message': 'Failed to send password reset email. Please try again.',
-    };
-  }
-}
-
 static Future<double?> fetchLatestRateFromTransactions(String? valuta, String transactionType) async {
   try {
     if(transactionType == "up"){
@@ -280,7 +262,96 @@ static Future<double?> fetchLatestRateFromTransactions(String? valuta, String tr
     throw Exception('Error fetching latest rate from transactions: $e');
   }
 }
+static Future<Map<String, double>> fetchCurrencyRates(String token) async {
+  final response = await http.get(
+    Uri.parse('https://data.fx.kg/api/v1/central'),
+    headers: {
+      'Authorization': 'Bearer $token', // Provide the token for authentication
+    },
+  );
 
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    // Parse the currency rates from the response with safe handling
+    return {
+      'usd': _parseRate(data['usd']),
+      'eur': _parseRate(data['eur']),
+      'kzt': _parseRate(data['kzt']),
+      'rub': _parseRate(data['rub']),
+      'gbp': _parseRate(data['gbp']),
+      'dkk': _parseRate(data['dkk']),
+      'inr': _parseRate(data['inr']),
+      'cad': _parseRate(data['cad']),
+      'cny': _parseRate(data['cny']),
+      'krw': _parseRate(data['krw']),
+      'nok': _parseRate(data['nok']),
+      'xdr': _parseRate(data['xdr']),
+      'sek': _parseRate(data['sek']),
+      'chf': _parseRate(data['chf']),
+      'jpy': _parseRate(data['jpy']),
+      'amd': _parseRate(data['amd']),
+      'byr': _parseRate(data['byr']),
+      'mdl': _parseRate(data['mdl']),
+      'tjs': _parseRate(data['tjs']),
+      'uzs': _parseRate(data['uzs']),
+      'uah': _parseRate(data['uah']),
+      'kwd': _parseRate(data['kwd']),
+      'huf': _parseRate(data['huf']),
+      'czk': _parseRate(data['czk']),
+      'nzd': _parseRate(data['nzd']),
+      'pkr': _parseRate(data['pkr']),
+      'aud': _parseRate(data['aud']),
+      'try': _parseRate(data['try']),
+      'azn': _parseRate(data['azn']),
+      'sgd': _parseRate(data['sgd']),
+      'afn': _parseRate(data['afn']),
+      'bgn': _parseRate(data['bgn']),
+      'brl': _parseRate(data['brl']),
+      'gel': _parseRate(data['gel']),
+      'aed': _parseRate(data['aed']),
+      'irr': _parseRate(data['irr']),
+      'myr': _parseRate(data['myr']),
+      'mnt': _parseRate(data['mnt']),
+      'twd': _parseRate(data['twd']),
+      'tmt': _parseRate(data['tmt']),
+      'pln': _parseRate(data['pln']),
+      'sar': _parseRate(data['sar']),
+      'byn': _parseRate(data['byn']),
+    };
+  } else {
+    throw Exception('Failed to load currency rates');
+  }
+}
+
+// Helper method to parse the currency rates safely
+static double _parseRate(String? rate) {
+  try {
+    return rate != null && rate.isNotEmpty ? double.parse(rate) : 0.0;
+  } catch (e) {
+    return 0.0; // Return 0.0 if the value is not a valid double
+  }
+}
+
+static Future<Map<String, dynamic>> forgotPassword(String email) async {
+    final url = Uri.parse('${_baseUrl}password-reset/');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+
+      if (response.statusCode == 200) {
+        return {'success': true, 'message': jsonDecode(response.body)['message']};
+      }
+      else {
+        final error = jsonDecode(response.body);
+        return {'success': false, 'message': error['error'] ?? 'An error occurred'};
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Failed to connect to the server'};
+    }
+  }
 
 
 
