@@ -18,18 +18,29 @@ class UserPageState extends State<Users> {
   final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
 
-  Future<void> addNewUser(String username, String password, String email) async {
-    try {
-      await ApiService.addNewUser(username, password, email);
-      _usernameController.clear();
-      _passwordController.clear();
-      _confirmPasswordController.clear();
-      _emailController.clear();
-      fetchUsers();
-    } catch (e) {
-      _showError('Error adding user: $e');
-    }
+Future<void> addNewUser(String username, String password, String email) async {
+  // Validate the email format
+  if (!RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$").hasMatch(email)) {
+    _showError('Invalid email format');
+    return; // Stop the function execution if the email is invalid
   }
+  if (password.length < 8) {
+    _showError('Password must be at least 8 characters long');
+    return; // Stop the function execution if the password is too short
+  }
+
+  try {
+    await ApiService.addNewUser(username, password, email);
+    _usernameController.clear();
+    _passwordController.clear();
+    _confirmPasswordController.clear();
+    _emailController.clear();
+    fetchUsers();
+  } catch (e) {
+    _showError('Error adding user: $e');
+  }
+}
+
 
   Future<void> fetchUsers() async {
     try {
@@ -69,12 +80,13 @@ class UserPageState extends State<Users> {
 
   @override
   Widget build(BuildContext context) {
-    if (selectedRowId != null) {
-      var selectedRow = userData.firstWhere(
-        (item) => item['id'] == selectedRowId,
-      );
-      selectedRowText = selectedRow['username'] ?? '';
-    }
+if (selectedRowId != null && userData.any((item) => item['id'] == selectedRowId)) {
+  var selectedRow = userData.firstWhere((item) => item['id'] == selectedRowId);
+  selectedRowText = selectedRow['username'] ?? '';
+} else {
+  selectedRowText = ''; // Handle the case where no match is found
+}
+
     
     return Scaffold(
       appBar: AppBar(
@@ -296,6 +308,10 @@ class UserPageState extends State<Users> {
   }
 
   Future<void> updatePassword(String newPassword) async {
+  if (newPassword.length < 8) {
+    _showError('Password must be at least 8 characters long');
+    return; // Stop the function execution if the password is too short
+  }
     if (selectedRowId != null) {
       try {
         await ApiService.updateUserPassword(selectedRowId!, newPassword);

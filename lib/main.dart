@@ -92,9 +92,7 @@ class MainPageState extends State<MainPage> {
   final TextEditingController _kursController = TextEditingController();
   final TextEditingController _obshiyController = TextEditingController();
   List<Map<String, dynamic>> _valutaList = [];
-  bool isEnglishSelected = true; // Initially set to English
-  
-
+  bool isEnglishSelected = true; 
   bool _isKolichestvoValid = true;
   bool _isKursValid = true;
   bool _isValutaValid = true;
