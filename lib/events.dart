@@ -163,7 +163,7 @@ void _showError(String message) {
         title: Text(AppLocalizations.of(context, 'trans')),
         leading: IconButton(
       icon: Icon(Icons.arrow_back),
-        onPressed: () {
+        onPressed: () { 
           Navigator.pop(context);
             setState(() {
       selectedRowId = null;
