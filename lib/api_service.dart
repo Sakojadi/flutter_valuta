@@ -317,6 +317,7 @@ static Future<Map<String, double>> fetchCurrencyRates(String token) async {
       'pln': _parseRate(data['pln']),
       'sar': _parseRate(data['sar']),
       'byn': _parseRate(data['byn']),
+      'som': 1.0,
     };
   } else {
     throw Exception('Failed to load currency rates');
