@@ -219,71 +219,74 @@ class UserPageState extends State<Users> {
             backgroundColor: Theme.of(context).colorScheme.secondary,
             onPressed: () {
               showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    title: Text(AppLocalizations.of(context, 'add')),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextField(
-                          controller: _usernameController,
-                          decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context, 'username'),
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        TextField(
-                          controller: _emailController,
-                          decoration: InputDecoration(
-                            labelText: 'Email',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        TextField(
-                          controller: _passwordController,
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context, 'password'),
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        TextField(
-                          controller: _confirmPasswordController,
-                          obscureText: true,
-                          decoration: InputDecoration(
-                            labelText: AppLocalizations.of(context, 'passrep'),
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ],
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text(AppLocalizations.of(context, 'cancel')),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          if (_usernameController.text.isNotEmpty &&
-                              _emailController.text.isNotEmpty &&
-                              _passwordController.text.isNotEmpty &&
-                              _passwordController.text == _confirmPasswordController.text) {
-                            addNewUser(_usernameController.text, _passwordController.text, _emailController.text);
-                            Navigator.pop(context);
-                          } else {
-                            _showError('Passwords do not match or fields are empty');
-                          }
-                        },
-                        child: Text(AppLocalizations.of(context, 'add')),
-                      ),
-                    ],
-                  );
-                },
-              );
+  context: context,
+  builder: (context) {
+    return AlertDialog(
+      title: Text(AppLocalizations.of(context, 'add')),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _usernameController,
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context, 'username'),
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: _emailController,
+              decoration: InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context, 'password'),
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              controller: _confirmPasswordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: AppLocalizations.of(context, 'passrep'),
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(AppLocalizations.of(context, 'cancel')),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            if (_usernameController.text.isNotEmpty &&
+                _emailController.text.isNotEmpty &&
+                _passwordController.text.isNotEmpty &&
+                _passwordController.text == _confirmPasswordController.text) {
+              addNewUser(_usernameController.text, _passwordController.text, _emailController.text);
+              Navigator.pop(context);
+            } else {
+              _showError('Passwords do not match or fields are empty');
+            }
+          },
+          child: Text(AppLocalizations.of(context, 'add')),
+        ),
+      ],
+    );
+  },
+);
+
             },
             child: Icon(Icons.add),
           ),

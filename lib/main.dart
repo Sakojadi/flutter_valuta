@@ -246,12 +246,6 @@ class MainPageState extends State<MainPage> {
       ),
       body: Stack(
         children: [
-          // IgnorePointer(
-          //   ignoring: true, // Allow interactions with elements above
-          //   child: FallingDollarsBackground(), // Animated background
-          // ),
-          
-          // Main content
           SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(30.0),
@@ -603,7 +597,7 @@ child: Text(AppLocalizations.of(context, 'add')),
                       label: Text(AppLocalizations.of(context, 'reports'), style: TextStyle(color: Colors.black)),
                     ),
                     NavigationRailDestination(
-                      icon: Icon(Icons.money, color: Colors.black),
+                      icon: Icon(Icons.wallet, color: Colors.black),
                       label: Text(AppLocalizations.of(context, 'cash'), style: TextStyle(color: Colors.black)),
                     ),
                     NavigationRailDestination(
